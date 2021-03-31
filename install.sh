@@ -59,7 +59,7 @@ fi
 
 #上传脚本和adb安装文件
 adb push ./termuxInit.sh /sdcard/ti.sh
-adb push ./adb-ndk /sdcard/
+# adb push ./adb-ndk /sdcard/
 #打开网络调试端口
 adb tcpip 5555
 
