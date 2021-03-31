@@ -58,13 +58,17 @@ else
 fi
 
 #上传脚本和adb安装文件
-adb push ./termuxInit.sh /sdcard/ti.sh
+# adb push ./termuxInit.sh /sdcard/ti.sh
+adb push ./termuxInit.sh /data/local/tmp
 # adb push ./adb-ndk /sdcard/
-#打开网络调试端口
+#启动Termux
 adb shell am start -n com.termux/.app.TermuxActivity
-adb shell input text "termux-setup-storage\ \&\&\ sh\ \/sdcard\/ti\.sh"
+# adb shell input text "termux-setup-storage\ \&\&\ sh\ \/sdcard\/ti\.sh"
+#输入脚本命令
+adb shell input text "sh\ \/data\/local\/tmp\/ti\.sh"
 adb shell input keyevent 66
 
+#打开网络调试端口
 adb tcpip 5555
 
 if [ $? -ne 0 ]; then
