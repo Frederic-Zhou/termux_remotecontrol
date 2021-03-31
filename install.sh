@@ -58,8 +58,8 @@ else
 fi
 
 #上传脚本和adb安装文件
-# adb push ./termuxInit.sh /sdcard/ti.sh
-adb push ./termuxInit.sh /data/local/tmp
+# adb push ./termux_init.sh /sdcard/ti.sh
+adb push ./termux_init.sh /data/local/tmp
 # adb push ./adb-ndk /sdcard/
 #启动Termux
 adb shell am start -n com.termux/.app.TermuxActivity

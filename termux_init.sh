@@ -28,7 +28,7 @@ python3 -m uiautomator2 init
 #创建测试
 script='
 import uiautomator2 as u2
-d = u2.connect()
+d = u2.connect("0.0.0.0")
 print(d.info)
 '
 echo "$script" >test.py
