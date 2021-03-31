@@ -61,9 +61,15 @@ fi
 adb push ./termuxInit.sh /sdcard/ti.sh
 # adb push ./adb-ndk /sdcard/
 #打开网络调试端口
+adb shell am start -n com.termux/.app.TermuxActivity
+adb shell input text "termux-setup-storage\ \&\&\ sh\ \/sdcard\/ti\.sh"
+adb shell input keyevent 66
+
 adb tcpip 5555
 
-echo '
-Next,run above command on Termux 
-sh /sdcard/ti.sh
-'
+if [ $? -ne 0 ]; then
+    echo "failed"
+    exit
+fi
+
+echo 'over!'
