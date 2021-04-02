@@ -2,7 +2,6 @@
 
 1. 电脑安装好adb工具
 2. 执行 `install.sh` 脚本
-3. 完成上一步后，在termux窗口执行 `sh /sdcard/ti.sh` 脚本命令
 
 ## 附:用ssh连接Termux
 
