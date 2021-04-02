@@ -1,3 +1,5 @@
+#!bin/bash
+
 # 一键配置Termux+adb+uiautomator2+ssh 环境
 # 目的
 # 1. Termux

@@ -112,6 +112,11 @@ ws_serv_initiative.onmessage = (msg) => {
             console.log("shell:" + body);
             ws_serv_initiative.send("shell:" + body);
         });
+    } else if (msg.data == "initiative_stop" && started) {
+        started = false
+        ws_minicap && ws_minicap.close()
+        ws_minitouch && ws_minitouch.close()
+        ws_whatsinput && ws_whatsinput.close()
     }
 };
 ws_serv_initiative.onerror = (ev) => {
