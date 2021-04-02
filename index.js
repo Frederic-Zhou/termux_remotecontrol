@@ -1,23 +1,27 @@
 const WebSocket = require('ws')
 const request = require('request');
-
-
-
 // define two ws object 
 // ws_minicap connect to mobile
 // ws_s connect to sever
-const ws_serv_initiative = new WebSocket(`ws://localhost:8001/websocket/initiative`);
+
 let ws_minicap
 let ws_minitouch
 let ws_whatsinput
+const localhost = "0.0.0.0"
 
+console.log("ServerAddress:", process.argv[2])
+let severAddr = process.argv[2]
+if (severAddr == "") {
+    console.log("need ServerAddress")
+    process.exit(1)
+}
+const ws_serv_initiative = new WebSocket(`ws://${severAddr}/websocket/initiative`);
 
 function start_transmit(ws_serv_initiative) {
     try {
-        // ws_minicap = new WebSocket(`ws://192.168.3.85:7912/minicap`);
-        ws_minicap = new WebSocket(`ws://192.168.3.85:27183`);
-        ws_minitouch = new WebSocket(`ws://192.168.3.85:7912/minitouch`);
-        ws_whatsinput = new WebSocket(`ws://192.168.3.85:6677`);
+        ws_minicap = new WebSocket(`ws://${localhost}:7912/minicap`);
+        ws_minitouch = new WebSocket(`ws://${localhost}:7912/minitouch`);
+        ws_whatsinput = new WebSocket(`ws://${localhost}:6677`);
     } catch (error) {
         console.log(error);
     }
@@ -42,7 +46,7 @@ function start_transmit(ws_serv_initiative) {
     };
     ws_minitouch.onmessage = (msg) => {
         ws_serv_initiative.send("minitouch:" + msg.data)
-        console.log(msg.data)
+        console.log("minitouch:" + msg.data)
     };
     ws_minitouch.onerror = (ev) => {
         ws_minitouch.close()
@@ -58,7 +62,7 @@ function start_transmit(ws_serv_initiative) {
     };
     ws_whatsinput.onmessage = (msg) => {
         ws_serv_initiative.send("whatsinput:" + msg.data)
-        console.log(msg.data)
+        console.log("whatsinput:" + msg.data)
     };
     ws_whatsinput.onerror = (ev) => {
         ws_whatsinput.close()
@@ -78,7 +82,7 @@ let started = false
 ws_serv_initiative.onopen = (ev) => {
     // console.log("serv ctrl open")
     //读取设备信息，并且发送给服务器
-    request('http://192.168.3.85:7912/info', {
+    request(`http://${localhost}:7912/info`, {
         json: false
     }, (err, res, body) => {
         if (err) {
@@ -98,7 +102,7 @@ ws_serv_initiative.onmessage = (msg) => {
     } else if (msg.data.indexOf("whatsinput:") == 0 && started && ws_whatsinput.readyState == 1) {
         ws_whatsinput.send(msg.data.substr("whatsinput:".length))
     } else if (msg.data.indexOf("shell:") == 0 && started) {
-        request('http://192.168.3.85:7912/shell?command=' + msg.data.substr("shell:".length), {
+        request(`http://${localhost}:7912/shell?command= ${msg.data.substr("shell:".length)}`, {
             json: false
         }, (err, res, body) => {
             if (err) {
@@ -120,4 +124,8 @@ ws_serv_initiative.onclose = (ev) => {
     ws_minicap && ws_minicap.close()
     ws_minitouch && ws_minitouch.close()
     ws_whatsinput && ws_whatsinput.close()
+    process.exit(1)
 };
+
+
+// 改用scrcpy 同屏和操作

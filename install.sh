@@ -80,6 +80,10 @@ else
     check
 fi
 
+#上传自连接脚本
+adb push ./index.js /data/local/tmp/index.js
+check
+
 #上传脚本和adb安装文件
 adb push ./termux_init.sh /data/local/tmp/ti.sh
 check
@@ -87,7 +91,8 @@ check
 adb shell am start -n com.termux/.app.TermuxActivity
 check
 #输入脚本命令
-adb shell input text "sh\ \/data\/local\/tmp\/ti\.sh"
+sleep 1
+adb shell input text "cp\ \/data\/local\/tmp\/ti\.sh\ \.\/ti\.sh\&\&bash\ \.\/ti\.sh"
 check
 adb shell input keyevent 66
 check
