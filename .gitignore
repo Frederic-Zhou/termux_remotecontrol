@@ -3,3 +3,4 @@ apk/termux_boot.apk
 apk/termux_task.apk
 apk/termux.apk
 adb-ndk/
+node_modules/

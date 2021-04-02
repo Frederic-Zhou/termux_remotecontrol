@@ -14,20 +14,32 @@
 ## 此步骤手工完成
 
 # 2. 下载Termux 和 Termux API 并通过adb命令安装(https://termux.com/)
+
+check() {
+    if [ $? -ne 0 ]; then
+        echo "\033[31m error \033[0m"
+        exit
+    fi
+}
+
 if [ ! -f "./apk/termux.apk" ]; then
     wget -O ./apk/termux.apk https://f-droid.org/repo/com.termux_108.apk
+    check
 fi
 
 if [ ! -f "./apk/termux_api.apk" ]; then
     wget -O ./apk/termux_api.apk https://f-droid.org/repo/com.termux.api_47.apk
+    check
 fi
 
 if [ ! -f "./apk/termux_boot.apk" ]; then
     wget -O ./apk/termux_boot.apk https://f-droid.org/repo/com.termux.boot_7.apk
+    check
 fi
 
 if [ ! -f "./apk/termux_task.apk" ]; then
     wget -O ./apk/termux_task.apk https://f-droid.org/repo/com.termux.tasker_5.apk
+    check
 fi
 
 #获得已经安装的app列表
@@ -37,43 +49,51 @@ if [[ "$packages" =~ "package:com.termux" ]]; then
     echo "termux Installed"
 else
     adb install ./apk/termux.apk
+    check
 fi
 
 if [[ "$packages" =~ "package:com.termux.api" ]]; then
     echo "termux.api Installed"
 else
     adb install ./apk/termux_api.apk
+    check
 fi
 
 if [[ "$packages" =~ "package:com.termux.boot" ]]; then
     echo "termux.boot Installed"
 else
     adb install ./apk/termux_boot.apk
+    check
 fi
 
 if [[ "$packages" =~ "package:com.termux.task" ]]; then
     echo "termux.task Installed"
 else
     adb install ./apk/termux_task.apk
+    check
+fi
+
+if [[ "$packages" =~ "package:com.buscode.whatsinput" ]]; then
+    echo "whatsinput Installed"
+else
+    adb install ./apk/whatsinput.apk
+    check
 fi
 
 #上传脚本和adb安装文件
-# adb push ./termux_init.sh /sdcard/ti.sh
-adb push ./termux_init.sh /data/local/tmp
-# adb push ./adb-ndk /sdcard/
+adb push ./termux_init.sh /data/local/tmp/ti.sh
+check
 #启动Termux
 adb shell am start -n com.termux/.app.TermuxActivity
-# adb shell input text "termux-setup-storage\ \&\&\ sh\ \/sdcard\/ti\.sh"
+check
 #输入脚本命令
 adb shell input text "sh\ \/data\/local\/tmp\/ti\.sh"
+check
 adb shell input keyevent 66
+check
 
 #打开网络调试端口
 adb tcpip 5555
-
-if [ $? -ne 0 ]; then
-    echo "failed"
-    exit
-fi
+check
 
 echo 'over!'
