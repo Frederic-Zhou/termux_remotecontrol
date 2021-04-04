@@ -7,8 +7,9 @@ const request = require('request');
 let ws_minicap
 let ws_minitouch
 let ws_whatsinput
+let isScreenSending = false
 const localhost = "0.0.0.0"
-let screenSending = false
+
 
 console.log("ServerAddress:", process.argv[2])
 let severAddr = process.argv[2]
@@ -27,15 +28,15 @@ function start_transmit(ws_serv_initiative) {
         console.log(error);
     }
 
-
+    //minicap 事件定义
     ws_minicap.onopen = (ev) => {
         console.log("minicap open")
     };
     ws_minicap.onmessage = (msg) => {
-        if (screenSending == false) {
+        if (isScreenSending == false) {
             ws_serv_initiative.send(msg.data)
             if (typeof msg.data == "object") {
-                screenSending = true;
+                isScreenSending = true;
             }
         }
     };
@@ -46,7 +47,9 @@ function start_transmit(ws_serv_initiative) {
     ws_minicap.onclose = (ev) => {
         console.log("minicap close")
     };
+    //---------------------------
 
+    //minitouch 事件定义
     ws_minitouch.onopen = (ev) => {
         console.log("minitouch open")
     };
@@ -61,8 +64,9 @@ function start_transmit(ws_serv_initiative) {
     ws_minitouch.onclose = (ev) => {
         console.log("minitouch close")
     };
+    //---------------------------
 
-
+    //whatsinput 事件定义
     ws_whatsinput.onopen = (ev) => {
         console.log("whatsinput open")
     };
@@ -77,6 +81,7 @@ function start_transmit(ws_serv_initiative) {
     ws_whatsinput.onclose = (ev) => {
         console.log("whatsinput close")
     };
+    //---------------------------
 
     return true
 }
@@ -104,7 +109,7 @@ ws_serv_initiative.onmessage = (msg) => {
     if (msg.data == "initiative_start" && !started) {
         started = start_transmit(ws_serv_initiative)
     } else if (msg.data == "screen_received") {
-        screenSending = false;
+        isScreenSending = false;
     } else if (msg.data.indexOf("minitouch:") == 0 && started && ws_minitouch.readyState == 1) {
         ws_minitouch.send(msg.data.substr("minitouch:".length))
     } else if (msg.data.indexOf("whatsinput:") == 0 && started && ws_whatsinput.readyState == 1) {
