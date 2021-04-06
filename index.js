@@ -1,25 +1,22 @@
 const WebSocket = require('ws')
 const request = require('request');
-// define two ws object 
-// ws_minicap connect to mobile
-// ws_s connect to sever
+
+console.log("ServerAddress:", process.argv[2])
+let severAddr = process.argv[2]
+if (!severAddr) {
+    severAddr = "192.168.3.100:8001" //测试地址
+}
 
 let ws_minicap
 let ws_minitouch
 let ws_whatsinput
+let ws_scrcpy
 let isScreenSending = false
 const localhost = "0.0.0.0"
 
-
-console.log("ServerAddress:", process.argv[2])
-let severAddr = process.argv[2]
-if (severAddr == "") {
-    console.log("need ServerAddress")
-    process.exit(1)
-}
 const ws_serv_initiative = new WebSocket(`ws://${severAddr}/websocket/initiative`);
 
-function start_transmit(ws_serv_initiative) {
+function start_mini(ws_serv_initiative, method) {
     try {
         ws_minicap = new WebSocket(`ws://${localhost}:7912/minicap`);
         ws_minitouch = new WebSocket(`ws://${localhost}:7912/minitouch`);
@@ -27,7 +24,6 @@ function start_transmit(ws_serv_initiative) {
     } catch (error) {
         console.log(error);
     }
-
     //minicap 事件定义
     ws_minicap.onopen = (ev) => {
         console.log("minicap open")
@@ -87,6 +83,37 @@ function start_transmit(ws_serv_initiative) {
 }
 
 
+function start_scrcpy(ws_serv_initiative, method) {
+    try {
+        ws_scrcpy = new WebSocket(`ws://${localhost}:8886`);
+    } catch (error) {
+        console.log(error);
+    }
+    //ws_scrcpy 事件定义
+    ws_scrcpy.onopen = (ev) => {
+        console.log("ws_scrcpy open")
+    };
+    ws_scrcpy.onmessage = (msg) => {
+        // if (isScreenSending == false) {
+        ws_serv_initiative.send(msg.data)
+        //     if (typeof msg.data == "object") {
+        //         isScreenSending = true;
+        //     }
+        // }
+    };
+    ws_scrcpy.onerror = (ev) => {
+        ws_scrcpy.close()
+        console.log("ws_scrcpy error")
+    };
+    ws_scrcpy.onclose = (ev) => {
+        console.log("ws_scrcpy close")
+    };
+    //---------------------------
+
+    return true
+}
+
+
 
 ////////////////////////////////////////
 let started = false
@@ -105,17 +132,24 @@ ws_serv_initiative.onopen = (ev) => {
     });
 };
 ws_serv_initiative.onmessage = (msg) => {
-    console.log("receive from server:", msg.data)
-    if (msg.data == "initiative_start" && !started) {
-        started = start_transmit(ws_serv_initiative)
-    } else if (msg.data == "screen_received") {
+    // console.log("receive from server:", msg.data)
+    //scrcpy收发都是二进制数据；minicap二进制发送画面，不收数据；minitouch/whatsinput都是收发文本数据
+    if (typeof msg.data == "object") { // 收到二进制对象，说明应该是scrcpy模式的数据，直接转发给ws_scrcpy
+        ws_scrcpy.send(msg.data)
+    } else if (msg.data == "initiative_start_mini" && !started) { //收到开始同屏消息 mini模式
+        started = start_mini(ws_serv_initiative)
+    } else if (msg.data == "initiative_start_scrcpy" && !started) { //收到开始同屏消息 scrcpy模式
+        started = start_scrcpy(ws_serv_initiative)
+    } else if (msg.data == "screen_received") { //收到屏幕消息接收完毕的信号(主要是对minicap模式生效)
         isScreenSending = false;
-    } else if (msg.data.indexOf("minitouch:") == 0 && started && ws_minitouch.readyState == 1) {
+    } else if (msg.data.indexOf("minitouch:") == 0 && started &&
+        ws_minitouch.readyState == 1) { //收到minitouch指令
         ws_minitouch.send(msg.data.substr("minitouch:".length))
-    } else if (msg.data.indexOf("whatsinput:") == 0 && started && ws_whatsinput.readyState == 1) {
+    } else if (msg.data.indexOf("whatsinput:") == 0 && started &&
+        ws_whatsinput.readyState == 1) { //收到whatsinput指令
         ws_whatsinput.send(msg.data.substr("whatsinput:".length))
         console.log(msg.data.substr("whatsinput:".length))
-    } else if (msg.data.indexOf("shell:") == 0 && started) {
+    } else if (msg.data.indexOf("shell:") == 0 && started) { //收到shell指令
         request(`http://${localhost}:7912/shell?command= ${msg.data.substr("shell:".length)}`, {
             json: false
         }, (err, res, body) => {
@@ -131,6 +165,7 @@ ws_serv_initiative.onmessage = (msg) => {
         ws_minicap && ws_minicap.close()
         ws_minitouch && ws_minitouch.close()
         ws_whatsinput && ws_whatsinput.close()
+        ws_scrcpy && ws_scrcpy.close()
         console.log("all stoped")
     }
 };
@@ -144,9 +179,13 @@ ws_serv_initiative.onclose = (ev) => {
     ws_minicap && ws_minicap.close()
     ws_minitouch && ws_minitouch.close()
     ws_whatsinput && ws_whatsinput.close()
+    ws_scrcpy && ws_scrcpy.close()
     process.exit(1)
 };
 
 //todo:
 // 改用scrcpy 同屏和操作
-// 画面延迟，因为websocket传输画面太慢
+/*
+1. adb push ./scrcpy-server.jar /data/local/tmp/scrcpy-server.jar
+2. adb shell CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process / com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2>&1 > /dev/null 
+*/

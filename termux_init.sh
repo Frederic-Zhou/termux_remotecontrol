@@ -31,6 +31,7 @@ if [ $? -ne 0 ]; then
 fi
 echo "uiautomator2 installed"
 # 初始化一次
+sleep 3 # 等待外部的adb tcpip命令生效
 python3 -m uiautomator2 init
 
 cp /data/local/tmp/index.js ./index.js

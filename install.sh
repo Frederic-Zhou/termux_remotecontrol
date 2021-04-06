@@ -90,8 +90,13 @@ check
 #启动Termux
 adb shell am start -n com.termux/.app.TermuxActivity
 check
+
+#安装scrcpy，并使其打开websocket端口8886
+adb push ./scrcpy-server.jar /data/local/tmp/scrcpy-server.jar
+adb shell CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process / com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2>&1 >/dev/null
+
 #输入脚本命令
-sleep 1
+sleep 2 #等待界面打开
 adb shell input text "cp\ \/data\/local\/tmp\/ti\.sh\ \.\/ti\.sh\&\&bash\ \.\/ti\.sh"
 check
 adb shell input keyevent 66
