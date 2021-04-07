@@ -1,19 +1,7 @@
 # 一键配置Termux+adb+uiautomator2+ssh 环境
-# 目的
-# 1. Termux
-# 2. Termux:API
-# 3. ADB
-# 4. Python3
-# 5. UIautomator2
-#
 
-## 电脑环境要求
-#-  Adb
-
-# 1. 打开手机开发者模式
-## 此步骤手工完成
-
-# 2. 下载Termux 和 Termux API 并通过adb命令安装(https://termux.com/)
+# 电脑环境要求：Adb
+# 手工打开手机开发者模式
 
 check() {
     if [ $? -ne 0 ]; then
@@ -21,26 +9,6 @@ check() {
         exit
     fi
 }
-
-if [ ! -f "./apk/termux.apk" ]; then
-    wget -O ./apk/termux.apk https://f-droid.org/repo/com.termux_108.apk
-    check
-fi
-
-if [ ! -f "./apk/termux_api.apk" ]; then
-    wget -O ./apk/termux_api.apk https://f-droid.org/repo/com.termux.api_47.apk
-    check
-fi
-
-if [ ! -f "./apk/termux_boot.apk" ]; then
-    wget -O ./apk/termux_boot.apk https://f-droid.org/repo/com.termux.boot_7.apk
-    check
-fi
-
-if [ ! -f "./apk/termux_task.apk" ]; then
-    wget -O ./apk/termux_task.apk https://f-droid.org/repo/com.termux.tasker_5.apk
-    check
-fi
 
 #获得已经安装的app列表
 packages=$(adb shell pm list packages)
@@ -80,23 +48,35 @@ else
     check
 fi
 
-#上传自连接脚本
-adb push ./index.js /data/local/tmp/index.js
+#安装scrcpy，并使其打开websocket端口8886
+adb push ./app/scrcpy-server.jar /data/local/tmp/scrcpy-server.jar
+adb shell CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process scrcpy-server.jar com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2>&1 >/dev/null &
+
+#安装ATX-agent
+adb push ./app/atx-agent /data/local/tmp
+adb shell chmod 755 /data/local/tmp/atx-agent
+adb shell /data/local/tmp/atx-agent server -d
 check
 
-#上传脚本和adb安装文件
-adb push ./termux_init.sh /data/local/tmp/ti.sh
+#上传同屏程序
+adb push ./src/index.js /data/local/tmp/src/index.js
+adb push ./src/package.json /data/local/tmp/src/package.json
 check
+
+#上传环境初始化文件
+adb push ./shell/termux_init.sh /data/local/tmp/ti.sh
+check
+
+#上传adb-ndk
+adb push ./adb-ndk /data/local/tmp/
+check
+
 #启动Termux
 adb shell am start -n com.termux/.app.TermuxActivity
 check
 
-#安装scrcpy，并使其打开websocket端口8886
-adb push ./scrcpy-server.jar /data/local/tmp/scrcpy-server.jar
-adb shell CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process / com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2>&1 >/dev/null
-
 #输入脚本命令
-sleep 2 #等待界面打开
+sleep 2 #等待界面打开,把环境脚本拷贝到termux目录。
 adb shell input text "cp\ \/data\/local\/tmp\/ti\.sh\ \.\/ti\.sh\&\&bash\ \.\/ti\.sh"
 check
 adb shell input keyevent 66
