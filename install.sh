@@ -51,8 +51,7 @@ adb shell /data/local/tmp/atx-agent server -d
 check
 
 #上传同屏程序
-adb push ./src/index.js /data/local/tmp/src/index.js
-adb push ./src/package.json /data/local/tmp/src/package.json
+adb push ./src/*.* /data/local/tmp/src/
 check
 
 #上传环境初始化文件

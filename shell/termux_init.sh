@@ -22,23 +22,23 @@ sleep 3
 adb devices
 
 # 3. 安装uiautomator2############################
-# python3 -c "import uiautomator2"
-# if [ $? -ne 0 ]; then
+python -c "import uiautomator2"
+if [ $? -ne 0 ]; then
 
-#     echo "uiautomator2 installing..."
-#     pkg update
+    echo "uiautomator2 installing..."
+    pkg update
 
-#     # 安装必要环境
-#     pkg install -y python ndk-sysroot clang make libjpeg-turbo libxml2 libxslt
-#     python -m pip install --upgrade pip
-#     # 安装U2
-#     pip3 install -U uiautomator2
+    # 安装必要环境
+    pkg install -y python ndk-sysroot clang make libjpeg-turbo libxml2 libxslt
+    python -m pip install --upgrade pip
+    # 安装U2
+    pip install -U uiautomator2
 
-# fi
-# echo "uiautomator2 installed"
+fi
+echo "uiautomator2 installed"
 
 # 初始化一次
-# python3 -m uiautomator2 init
+# python -m uiautomator2 init
 ################################################
 
 #4. 部署同屏程序

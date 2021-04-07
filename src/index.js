@@ -1,7 +1,8 @@
 const WebSocket = require('ws')
 const request = require('request');
 const http = require('http');
-const urlencode = require('urlencode');
+const express = require("express");
+const bodyParser = require('body-parser');
 const child_process = require("child_process");
 let ws_serv_initiative
 
@@ -185,30 +186,48 @@ function runScreenServer(severAddr) {
 
 }
 
+html = `
+<html>
+    <body>
+        remote connect status:${ws_serv_initiative&&ws_minitouch.readyState.readyState} <br/>
+        <form method="post">
+            <input type="text" name="remotehost" value="192.168.3.100:8001"/> <br/>
+            <input type="submit" value="submit"/>
+        </form>
+    </body>
+</html>
+`
+let app = express();
 
-var server = http.createServer(function (request, response) {
-    request.on('data', function (chunk) {
-        // chunk 默认是一个二进制数据，和 data 拼接会自动 toString
-        let remotehost = urlencode.decode(chunk.toString().split('=')[1])
-        console.log(remotehost);
-        runScreenServer(remotehost)
-    });
+app.use(express.urlencoded({
+    extended: true
+}));
+app.use(express.json());
 
-    response.write(`<html><body>status:${ws_serv_initiative&&ws_serv_initiative.readyState}<br/><form method="post"><input type="text" name="remotehost" value="192.168.3.100:8001"/><input type="submit" value="submit"/></form></body></html>`)
-    response.end()
+app.get('/', function (req, res) {
+    res.send(html);
 })
 
+app.post('/', function (req, res) {
+    console.log(req.body.remotehost);
+    runScreenServer(req.body.remotehost)
+    res.redirect("/")
+})
 
+var server = app.listen(8002, function () {
+    var port = server.address().port
+    console.log("visit http://127.0.0.1:%s", port)
 
-child_process.execFile("adb", ["shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", "http://127.0.0.1:8002"], function (err, stdout, stderr) {
-    if (err) {
-        console.error(err);
-    }
-    console.log("stdout:", stdout)
-    console.log("stderr:", stderr);
-});
-
-server.listen(8002, '0.0.0.0')
+    child_process.execFile("adb",
+        ["shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", `http://127.0.0.1:${port}`],
+        function (err, stdout, stderr) {
+            if (err) {
+                console.error(err);
+            }
+            console.log("stdout:", stdout)
+            console.log("stderr:", stderr);
+        });
+})
 
 //todo
 //1. 完善web控制台

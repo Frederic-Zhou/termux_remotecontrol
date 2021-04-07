@@ -1,5 +1,6 @@
 {
     "dependencies": {
+        "express": "^4.17.1",
         "request": "^2.88.2",
         "urlencode": "^1.1.0",
         "ws": "^7.4.4"
