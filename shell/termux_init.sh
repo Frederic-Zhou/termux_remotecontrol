@@ -2,6 +2,7 @@
 
 #1. 安装必要环境
 pkg install -y nodejs-lts termux-api
+#####################################################
 
 #2. 如果不存在ADB安装ADB环境
 adb version
@@ -20,13 +21,14 @@ fi
 # 启动ADB
 sleep 3
 adb devices
+#####################################################
 
-# 3. 安装uiautomator2############################
+# 3. 安装uiautomator2
 python -c "import uiautomator2"
 if [ $? -ne 0 ]; then
 
     echo "uiautomator2 installing..."
-    pkg update
+    pkg -y update
 
     # 安装必要环境
     pkg install -y python ndk-sysroot clang make libjpeg-turbo libxml2 libxslt
@@ -39,7 +41,7 @@ echo "uiautomator2 installed"
 
 # 初始化一次
 # python -m uiautomator2 init
-################################################
+#####################################################
 
 #4. 部署同屏程序
 #copy同屏程序到home目录
@@ -48,3 +50,4 @@ termux-wake-lock
 cd ~/src
 npm install
 npm start
+#######################################################
