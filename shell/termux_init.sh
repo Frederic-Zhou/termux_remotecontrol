@@ -37,11 +37,28 @@ fi
 # sleep 3 # 等待外部的adb tcpip命令生效
 # python3 -m uiautomator2 init
 
-#启动同屏程序
+#copy同屏程序到home目录
 cp -r /data/local/tmp/src ./
-cd ./src
-echo "start..."
-read -r -p "ServerAddress?[domain:port] " input
+
+# 打开浏览器
+adb devices
+sleep 3
+adb shell am start -a android.intent.action.VIEW -d http://127.0.0.1:8002
+
+#写入自动启动脚本到Termux boot
+boot_script='
+#!/data/data/com.termux/files/usr/bin/sh
+termux-wake-lock
+cd ~/src
 npm install
-npm start $input
-echo "over..."
+npm start
+'
+mkdir -p ~/.termux/boot/
+echo "$boot_script" >~/.termux/boot/runScreen.sh
+chmod +x ~/.termux/boot/runScreen.sh
+#默认启动一次脚本
+bash ~/.termux/boot/runScreen.sh
+
+#todo
+#1. 脚本交互自动输入回车
+#2. index.js启动好后，自动打开浏览器
