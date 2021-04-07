@@ -2,6 +2,7 @@ const WebSocket = require('ws')
 const request = require('request');
 const http = require('http');
 const urlencode = require('urlencode');
+const child_process = require("child_process");
 let ws_serv_initiative
 
 
@@ -196,7 +197,19 @@ var server = http.createServer(function (request, response) {
     response.write(`<html><body>status:${ws_serv_initiative&&ws_serv_initiative.readyState}<br/><form method="post"><input type="text" name="remotehost" value="192.168.3.100:8001"/><input type="submit" value="submit"/></form></body></html>`)
     response.end()
 })
+
+
+
+child_process.execFile("adb", ["shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", "http://127.0.0.1:8002"], function (err, stdout, stderr) {
+    if (err) {
+        console.error(err);
+    }
+    console.log("stdout:", stdout)
+    console.log("stderr:", stderr);
+});
+
 server.listen(8002, '0.0.0.0')
 
 //todo
 //1. 完善web控制台
+//2. 每次都自动运行控制台

@@ -10,6 +10,12 @@ check() {
     fi
 }
 
+#打开网络调试端口
+adb tcpip 5555
+check
+
+sleep 3
+
 #获得已经安装的app列表
 packages=$(adb shell pm list packages -3)
 
@@ -66,10 +72,6 @@ sleep 2 #等待界面打开,把环境脚本拷贝到termux目录。
 adb shell input text "cp\ \/data\/local\/tmp\/ti\.sh\ \.\/ti\.sh\&\&bash\ \.\/ti\.sh"
 check
 adb shell input keyevent 66
-check
-
-#打开网络调试端口
-adb tcpip 5555
 check
 
 echo 'over!'
