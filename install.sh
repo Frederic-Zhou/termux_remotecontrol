@@ -11,7 +11,7 @@ check() {
 }
 
 #获得已经安装的app列表
-packages=$(adb shell pm list packages)
+packages=$(adb shell pm list packages -3)
 
 if [[ "$packages" =~ "package:com.termux" ]]; then
     echo "termux Installed"
@@ -24,20 +24,6 @@ if [[ "$packages" =~ "package:com.termux.api" ]]; then
     echo "termux.api Installed"
 else
     adb install ./apk/termux_api.apk
-    check
-fi
-
-if [[ "$packages" =~ "package:com.termux.boot" ]]; then
-    echo "termux.boot Installed"
-else
-    adb install ./apk/termux_boot.apk
-    check
-fi
-
-if [[ "$packages" =~ "package:com.termux.task" ]]; then
-    echo "termux.task Installed"
-else
-    adb install ./apk/termux_task.apk
     check
 fi
 
