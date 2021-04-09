@@ -30,6 +30,7 @@ adb version
 if [ $? -ne 0 ]; then
     echo "install adb ..."
     # adb 安装
+    cd ~
     git clone https://github.com/Magisk-Modules-Repo/adb-ndk.git
     cd ./adb-ndk/bin/
     mv -f adb.bin adb
@@ -49,7 +50,7 @@ adb push ~/termux_remotecontrol/app/scrcpy-server.jar /data/local/tmp/scrcpy-ser
 adb shell CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process scrcpy-server.jar com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2>&1 >/dev/null &
 check
 #安装ATX-agent
-adb push ~/termux_remotecontrol/app/atx-agent /data/local/tmp
+adb push ~/termux_remotecontrol/app/atx-agent /data/local/tmp/atx-agent
 adb shell chmod 755 /data/local/tmp/atx-agent
 adb shell /data/local/tmp/atx-agent server -d
 check
