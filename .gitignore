@@ -1,2 +1,3 @@
 node_modules/
-apk/termux*
+apk/termux_api.apk
+apk/termux.apk
