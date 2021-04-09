@@ -7,7 +7,7 @@ check() {
 }
 
 sleep 3
-
+echo -e "\033[33m ===APK INSTALL START================================================== \033[0m"
 packages=$(adb shell pm list packages -3)
 if [[ "$packages" =~ "package:com.termux.api" ]]; then
     echo "termux.api Installed"
@@ -25,11 +25,13 @@ fi
 echo -e "\033[33m ===APK INSTALL OVER================================================== \033[0m"
 
 #1. 安装必要环境
+echo -e "\033[33m ===NEEDED PACKAGES INSTALL START================================================== \033[0m"
 pkg install -y nodejs-lts termux-api git
 echo -e "\033[33m ===NEEDED PACKAGES INSTALL OVER================================================== \033[0m"
 #####################################################
 
 #2. 如果不存在ADB安装ADB环境
+echo -e "\033[33m ===ADB INSTALL/RUN START================================================== \033[0m"
 adb version
 if [ $? -ne 0 ]; then
     echo "install adb ..."
@@ -51,6 +53,7 @@ echo -e "\033[33m ===ADB INSTALL/RUN OVER=======================================
 sleep 3
 ########################################################
 #安装scrcpy，并使其打开websocket端口8886
+echo -e "\033[33m ===scrcpy-server.jar/ATX-agent INSTALL START================================================== \033[0m"
 adb push ~/termux_remotecontrol/app/scrcpy-server.jar /data/local/tmp/scrcpy-server.jar
 adb shell CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process scrcpy-server.jar com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2>&1 >/dev/null &
 check
