@@ -13,12 +13,26 @@
 <body>
     remote connect status:<span id="status">loading...</span>
     <form method="post" action="/run">
-        <input type="text" name="remotehost" value="192.168.3.100:8001" />
+        <input id="remotehost" type="text" name="remotehost" value="192.168.3.100:8001" />
         <input type="submit" value="submit" />
     </form>
 </body>
 
 <script>
+    function get_param() {
+        var url = location.search;
+        var arr = url.replace(/^\?+/, "").split("&");
+        var obj = {}
+        for (var i = 0; i < arr.length; i++) {
+            var v = arr[i].split('=')
+            if (v.length > 1) {
+                obj[v[0]] = decodeURIComponent(v[1])
+            }
+        }
+        return obj;
+    }
+    document.getElementById("remotehost").value = get_param()["remotehost"]
+
     function runAjax(url, method, callback) {
 
         xmlhttp = new XMLHttpRequest();

@@ -186,6 +186,10 @@ function runScreenServer(severAddr) {
 
 }
 
+let remotehost = process.env.REMOTEHOST
+if (remotehost) {
+    runScreenServer(remotehost)
+}
 
 let app = express();
 
@@ -198,7 +202,7 @@ app.use(express.static('./view'));
 app.post('/run', function (req, res) {
     console.log("connect to ", req.body.remotehost);
     runScreenServer(req.body.remotehost)
-    res.redirect("/")
+    res.redirect(`/?remotehost=${req.body.remotehost}`)
 })
 app.post('/status', function (req, res) {
     res.send(`${ws_serv_initiative ? ws_serv_initiative.readyState : -1}`)
@@ -209,7 +213,7 @@ var server = app.listen(8002, function () {
     console.log("visit http://127.0.0.1:%s", port)
 
     child_process.execFile("adb",
-        ["shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", `http://127.0.0.1:${port}`],
+        ["shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", `http://127.0.0.1:${port}?remotehost=${remotehost}`],
         function (err, stdout, stderr) {
             if (err) {
                 console.error(err);
