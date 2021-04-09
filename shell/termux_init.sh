@@ -41,21 +41,21 @@ if [ $? -ne 0 ]; then
 fi
 # 启动ADB
 adb kill-server
-sleep 3
 adb devices
+sleep 3
 ########################################################
 #安装scrcpy，并使其打开websocket端口8886
-adb push ./app/scrcpy-server.jar /data/local/tmp/scrcpy-server.jar
+adb push ~/termux_remotecontrol/app/scrcpy-server.jar /data/local/tmp/scrcpy-server.jar
 adb shell CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process scrcpy-server.jar com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2>&1 >/dev/null &
 check
 #安装ATX-agent
-adb push ./app/atx-agent /data/local/tmp
+adb push ~/termux_remotecontrol/app/atx-agent /data/local/tmp
 adb shell chmod 755 /data/local/tmp/atx-agent
 adb shell /data/local/tmp/atx-agent server -d
 check
 #######################################################
 
 termux-wake-lock
-cd ~/termux_remotecontrol/app
+cd ~/termux_remotecontrol/src
 npm install
 npm start
