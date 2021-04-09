@@ -6,6 +6,13 @@ check() {
     fi
 }
 
+#检查是否已经运行
+result=$(ps -ef | grep node)
+if [[ "$result" =~ "node index.js" ]]; then
+    echo -e "\033[33m started \033[0m"
+    exit
+fi
+
 sleep 3
 
 #1. 安装必要环境
