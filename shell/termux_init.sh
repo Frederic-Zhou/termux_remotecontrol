@@ -45,9 +45,13 @@ sleep 3
 
 #安装scrcpy，并使其打开websocket端口8886
 echo -e "\033[32m ===scrcpy-server.jar/ATX-agent INSTALL START=== \033[0m"
-adb push ~/termux_remotecontrol/app/scrcpy-server.jar /data/local/tmp/scrcpy-server.jar
-adb shell CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process scrcpy-server.jar com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2>&1 >/dev/null &
-check
+if [[ "$result" =~ "scrcpy-server.jar" ]]; then
+    echo -e "\033[33m scrcpy-server.jar started \033[0m"
+else
+    adb push ~/termux_remotecontrol/app/scrcpy-server.jar /data/local/tmp/scrcpy-server.jar
+    adb shell CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process scrcpy-server.jar com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2>&1 >/dev/null &
+    check
+fi
 echo -e "\033[32m ===scrcpy-server.jar INSTALL OVER=== \033[0m"
 #安装ATX-agent
 adb push ~/termux_remotecontrol/app/atx-agent /data/local/tmp/atx-agent
