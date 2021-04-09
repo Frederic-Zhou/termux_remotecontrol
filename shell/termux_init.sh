@@ -40,6 +40,7 @@ if [ $? -ne 0 ]; then
 # adb 安装结束
 fi
 # 启动ADB
+adb kill-server
 sleep 3
 adb devices
 ########################################################
