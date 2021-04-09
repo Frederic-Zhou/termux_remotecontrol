@@ -1,7 +1,28 @@
 #!/data/data/com.termux/files/usr/bin/bash
+check() {
+    if [ $? -ne 0 ]; then
+        echo "\033[31m error \033[0m"
+        exit
+    fi
+}
+
+packages=$(adb shell pm list packages -3)
+if [[ "$packages" =~ "package:com.termux.api" ]]; then
+    echo "termux.api Installed"
+else
+    adb install ./apk/termux_api.apk
+    check
+fi
+
+if [[ "$packages" =~ "package:com.buscode.whatsinput" ]]; then
+    echo "whatsinput Installed"
+else
+    adb install ./apk/whatsinput.apk
+    check
+fi
 
 #1. 安装必要环境
-pkg install -y nodejs-lts termux-api
+pkg install -y nodejs-lts termux-api git
 #####################################################
 
 #2. 如果不存在ADB安装ADB环境
@@ -9,7 +30,7 @@ adb version
 if [ $? -ne 0 ]; then
     echo "install adb ..."
     # adb 安装
-    cp -r /data/local/tmp/adb-ndk ./
+    git clone https://github.com/Magisk-Modules-Repo/adb-ndk.git
     cd ./adb-ndk/bin/
     mv -f adb.bin adb
     chmod +x ./*
@@ -21,33 +42,19 @@ fi
 # 启动ADB
 sleep 3
 adb devices
-#####################################################
+########################################################
+#安装scrcpy，并使其打开websocket端口8886
+adb push ./app/scrcpy-server.jar /data/local/tmp/scrcpy-server.jar
+adb shell CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process scrcpy-server.jar com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2>&1 >/dev/null &
+check
+#安装ATX-agent
+adb push ./app/atx-agent /data/local/tmp
+adb shell chmod 755 /data/local/tmp/atx-agent
+adb shell /data/local/tmp/atx-agent server -d
+check
+#######################################################
 
-# 3. 安装uiautomator2
-python -c "import uiautomator2"
-if [ $? -ne 0 ]; then
-
-    echo "uiautomator2 installing..."
-    pkg -y update
-
-    # 安装必要环境
-    pkg install -y python ndk-sysroot clang make libjpeg-turbo libxml2 libxslt
-    python -m pip install --upgrade pip
-    # 安装U2
-    pip install -U uiautomator2
-
-fi
-echo "uiautomator2 installed"
-
-# 初始化一次
-# python -m uiautomator2 init
-#####################################################
-
-#4. 部署同屏程序
-#copy同屏程序到home目录
-cp -r /data/local/tmp/src ./
 termux-wake-lock
-cd ~/src
+cd ~/termux_remotecontrol/app
 npm install
 npm start
-#######################################################
