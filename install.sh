@@ -5,7 +5,7 @@
 
 check() {
     if [ $? -ne 0 ]; then
-        echo "\033[31m error \033[0m"
+        echo -e "\033[31m error \033[0m"
         exit
     fi
 }
@@ -49,7 +49,7 @@ fi
 adb shell am start -n com.termux/.app.TermuxActivity
 check
 
-sleep 2 #等待界面打开,把环境脚本拷贝到termux目录。
+sleep 5 #等待界面打开,把环境脚本拷贝到termux目录。
 # adb shell input text "cp\ \/data\/local\/tmp\/ti\.sh\ \.\/ti\.sh\&\&bash\ \.\/ti\.sh"
 adb shell input text "cd\ ~\&\&pkg\ install\ -y\ git"
 adb shell input text "\&\&rm\ -rf\ ~/termux_remotecontrol"
