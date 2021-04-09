@@ -10,14 +10,14 @@ packages=$(adb shell pm list packages -3)
 if [[ "$packages" =~ "package:com.termux.api" ]]; then
     echo "termux.api Installed"
 else
-    adb install ./apk/termux_api.apk
+    adb install ~/termux_remotecontrol/apk/termux_api.apk
     check
 fi
 
 if [[ "$packages" =~ "package:com.buscode.whatsinput" ]]; then
     echo "whatsinput Installed"
 else
-    adb install ./apk/whatsinput.apk
+    adb install ~/termux_remotecontrol/apk/whatsinput.apk
     check
 fi
 
