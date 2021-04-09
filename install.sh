@@ -52,6 +52,7 @@ check
 
 #上传同屏程序
 adb push ./src/*.* /data/local/tmp/src/
+adb push ./src/view /data/local/tmp/src/
 check
 
 #上传环境初始化文件

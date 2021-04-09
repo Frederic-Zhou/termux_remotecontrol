@@ -1,0 +1,52 @@
+<html>
+
+<head>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <style>
+        body {
+            font: normal 100% Helvetica, Arial, sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    remote connect status:<span id="status">loading...</span>
+    <form method="post" action="/run">
+        <input type="text" name="remotehost" value="192.168.3.100:8001" />
+        <input type="submit" value="submit" />
+    </form>
+</body>
+
+<script>
+    function runAjax(url, method, callback) {
+
+        xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                callback(xmlhttp)
+            }
+        }
+        xmlhttp.open(method, url, true);
+        xmlhttp.send();
+
+    }
+
+    var intervalHandle = setInterval(() => {
+        runAjax("/status", "POST", function (xmlhttp) {
+
+            let statusMap = {
+                "-1": "未连接",
+                "0": "连接中",
+                "1": "成功",
+                "2": "关闭中",
+                "3": "已关闭",
+            }
+
+            document.getElementById("status").innerHTML = statusMap[xmlhttp.responseText];
+        })
+    }, 3000);
+</script>
+
+</html>

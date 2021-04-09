@@ -186,32 +186,22 @@ function runScreenServer(severAddr) {
 
 }
 
-html = `
-<html>
-    <body>
-        remote connect status:${ws_serv_initiative&&ws_minitouch.readyState.readyState} <br/>
-        <form method="post">
-            <input type="text" name="remotehost" value="192.168.3.100:8001"/> <br/>
-            <input type="submit" value="submit"/>
-        </form>
-    </body>
-</html>
-`
+
 let app = express();
 
 app.use(express.urlencoded({
     extended: true
 }));
 app.use(express.json());
+app.use(express.static('./view'));
 
-app.get('/', function (req, res) {
-    res.send(html);
-})
-
-app.post('/', function (req, res) {
-    console.log(req.body.remotehost);
+app.post('/run', function (req, res) {
+    console.log("connect to ", req.body.remotehost);
     runScreenServer(req.body.remotehost)
     res.redirect("/")
+})
+app.post('/status', function (req, res) {
+    res.send(`${ws_serv_initiative ? ws_serv_initiative.readyState : -1}`)
 })
 
 var server = app.listen(8002, function () {
