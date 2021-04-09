@@ -33,6 +33,13 @@ else
     check
 fi
 
+if [[ "$packages" =~ "package:com.termux.boot" ]]; then
+    echo "termux.boot Installed"
+else
+    adb install ./apk/termux_boot.apk
+    check
+fi
+
 if [[ "$packages" =~ "package:com.buscode.whatsinput" ]]; then
     echo "whatsinput Installed"
 else
