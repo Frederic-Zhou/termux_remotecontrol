@@ -26,6 +26,13 @@ else
     check
 fi
 
+if [[ "$packages" =~ "package:com.buscode.whatsinput" ]]; then
+    echo "whatsinput Installed"
+else
+    adb install ~/termux_remotecontrol/apk/whatsinput.apk
+    check
+fi
+
 #安装scrcpy，并使其打开websocket端口8886
 # adb push ./app/scrcpy-server.jar /data/local/tmp/scrcpy-server.jar
 # adb shell CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process scrcpy-server.jar com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2>&1 >/dev/null &

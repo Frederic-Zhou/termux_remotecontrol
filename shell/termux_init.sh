@@ -35,25 +35,7 @@ adb kill-server
 adb devices
 echo -e "\033[32m ===ADB INSTALL/RUN OVER============ \033[0m"
 sleep 3
-#############################################################
-echo -e "\033[32m ===APK INSTALL START============ \033[0m"
-packages=$(adb shell pm list packages -3)
-# if [[ "$packages" =~ "package:com.termux.api" ]]; then
-#     echo "termux.api Installed"
-# else
-#     adb install ~/termux_remotecontrol/apk/termux_api.apk
-#     check
-# fi
 
-if [[ "$packages" =~ "package:com.buscode.whatsinput" ]]; then
-    echo "whatsinput Installed"
-else
-    adb install ~/termux_remotecontrol/apk/whatsinput.apk
-    check
-fi
-echo -e "\033[32m ===APK INSTALL OVER============ \033[0m"
-
-########################################################
 #安装scrcpy，并使其打开websocket端口8886
 echo -e "\033[32m ===scrcpy-server.jar/ATX-agent INSTALL START============ \033[0m"
 adb push ~/termux_remotecontrol/app/scrcpy-server.jar /data/local/tmp/scrcpy-server.jar
