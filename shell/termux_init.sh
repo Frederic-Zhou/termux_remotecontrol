@@ -38,7 +38,6 @@ if [ $? -ne 0 ]; then
 # adb 安装结束
 fi
 # 启动ADB
-adb kill-server
 adb devices
 echo -e "\033[32m ===ADB INSTALL/RUN OVER=== \033[0m"
 sleep 3
