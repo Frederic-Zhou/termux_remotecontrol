@@ -1,0 +1,350 @@
+import win.ui;
+/*DSG{{*/
+mainForm = win.form(text="手机终端安装工具";right=689;bottom=646;max=false)
+mainForm.add(
+btn_addhost={cls="button";text="新增";left=294;top=236;right=340;bottom=258;z=14};
+btn_chkadb={cls="button";text="检测ADB连接";left=18;top=120;right=150;bottom=153;z=4};
+btn_clrlog={cls="button";text="清除";left=623;top=322;right=685;bottom=344;z=12};
+btn_delhost={cls="button";text="删除选中";left=350;top=236;right=422;bottom=258;z=13};
+btn_initapk={cls="button";text="安装APP及必要文件";left=353;top=120;right=515;bottom=153;disabled=1;z=5};
+btn_run={cls="button";text="启动服务";left=16;top=268;right=148;bottom=301;disabled=1;z=9};
+edit_log={cls="edit";left=4;top=346;right=685;bottom=642;autohscroll=false;edge=1;multiline=1;vscroll=1;z=10};
+sel_dvs={cls="combobox";left=157;top=124;right=345;bottom=150;disabled=1;edge=1;font=LOGFONT(h=-16);items={"请检测设备.."};mode="dropdownlist";vscroll=1;z=15};
+sel_host={cls="combobox";left=83;top=234;right=287;bottom=260;edge=1;font=LOGFONT(h=-16);items={"请选择.."};mode="dropdownlist";vscroll=1;z=8};
+static={cls="static";text="IP及端口：";left=17;top=238;right=87;bottom=264;transparent=1;z=6};
+static2={cls="static";text="格式: IP:端口;
+如:127.0.0.1:8081";left=431;top=234;right=552;bottom=266;transparent=1;z=7};
+static3={cls="static";text="运行日志：";left=8;top=325;right=116;bottom=346;transparent=1;z=11};
+txt1={cls="static";text="第一步";left=21;top=13;right=656;bottom=66;transparent=1;z=1};
+txt2={cls="static";text="第二步";left=20;top=77;right=655;bottom=111;transparent=1;z=2};
+txt3={cls="static";text="第三步";left=21;top=177;right=656;bottom=225;transparent=1;z=3}
+)
+/*}}*/
+
+import process;
+import process.popen;
+import win.inputBox;
+import inet.downBox;
+import web.json;
+
+import console;
+
+// ========================================================== 
+host_file = "\host.json";
+host_arr = {"请选择.."};
+// ========================================================== 
+
+
+mainForm.txt1.text = "第一步：(!!! 每次仅可插入一台手机 !!!)
+1. 开启手机端开发者模式；2. 使用USB线连接anroid系统手机；3.开启USB调试；
+";
+mainForm.txt2.text = "第二步：(!!! 每次仅可插入一台手机 !!!)
+1. 检查adb连接状态，3. 点击安装按钮，为手机安装必要app及文件
+";
+mainForm.txt3.text = "第三步：(!!! 每次仅可插入一台手机 !!!)
+填写服务器ip及端口，点击启动服务按钮；执行成功后登入服务器可查看及管理该设备
+更换手机后按照第一二三步流程操作
+";
+
+mainForm.edit_log.setCueBannerText("运行日志输出区域");
+
+
+
+// ========================================================== 
+function init_host(seltxt){
+    var str=string.load(host_file);
+    host_arr = web.json.parse(str);
+
+    mainForm.sel_host.items=host_arr
+    mainForm.sel_host.redraw();
+    if(!seltxt){
+        mainForm.sel_host.selIndex = 1;
+    }else{
+        mainForm.sel_host.selText = seltxt;
+    }
+}
+
+function add_host(){
+	var box = win.inputBox();
+	box.text="填写服务器地址："
+	box.info.text="格式：服务器地址:端口，如：127.0.0.1:8080";
+	box.input.text="127.0.0.1:8080";
+	var input_host = box.doModal();
+	if(input_host==null){return;}
+	if(input_host==""){return;}
+	table.push(host_arr,input_host);
+	string.save(host_file,web.json.stringify(host_arr));
+	init_host(input_host);
+	echo("新增服务器："++input_host);
+	win.msgboxTimeout("添加成功","提示",2000);
+}
+
+function del_host(){
+	var txt=mainForm.sel_host.selText;
+	if(txt=="请选择.."){return;}
+	var idx=mainForm.sel_host.selIndex;
+	mainForm.sel_host.delete();
+	
+	host_arr = mainForm.sel_host.items;
+	string.save(host_file,web.json.stringify(host_arr));
+	init_host();
+	
+	echo("删除服务器："++txt);
+	win.msgboxTimeout("删除成功","提示",2000);
+}
+
+// ========================================================== 
+
+
+
+//adbshell
+function adbshell_bak(dvs,cmd){
+    return adb("-s "++dvs++" shell "++cmd);
+}
+function adbshell(cmd,dvs){
+    //var dvs=mainForm.sel_dvs.selText;
+    return adb("shell "++cmd,dvs);
+}
+
+//adb命令
+function adb(cmd,dvs){
+    if(dvs!=null){
+        cmd = " -s "++dvs++" "++cmd;
+    }
+    var ret = win.invoke(
+    	function(cmd){
+    		import process.popen;
+    		import console;
+    		var prcs = process.popen("/bin/adb.exe",cmd);
+			var ret = "";
+			for( all,out,err in prcs.each(100,5000) ){
+        		//console.log(cmd++" out===>",out);
+        		//console.log(cmd++" err===>",err);
+        		//console.log(cmd++" all===>",all);
+        		ret += all;
+    		}
+			prcs.terminate();
+			return ret; 
+    	} 
+    ,cmd)
+	return ret; 
+}
+//截取字符串
+function cutstr(str,start,stop){
+	if(!#str){return "";}
+	if(!start&&stop){
+		var arr0 = string.split(str,"<"++stop++">",1);
+		return arr0[1];
+	}
+	if(start&&!stop){
+		var arr0 = string.split(str,"<"++start++">",1);
+		return arr0[2];
+	}
+	var arr1 = string.split(str,"<"++start++">",1);
+	if(#arr1>1){
+		var arr2 = string.split(arr1[2],"<"++stop++">",1);
+		return arr2[1]; 
+	}else{
+		return ""; 
+	}
+}
+
+function echo(str){
+	mainForm.edit_log.appendText(tostring(str)++'\r\n');
+}
+
+
+// ========================================================== 
+function chk_adb(){
+	mainForm.sel_dvs.disabled=true;
+	mainForm.btn_initapk.disabled=true;
+	mainForm.btn_run.disabled=true;
+    
+	var res = adb("devices -l");
+	if(!#res){
+		win.msgbox("未获取到设备，请将手机使用USB连接电脑")
+		return;
+	}
+	var arr = string.split(res,'\n');
+	var dvs_arr={};
+	for(i=2;#arr;1){
+		var line = string.trim(arr[i]);
+		if(!#line){continue;}
+		var stat = string.trim(cutstr(line,"    "," product:"));
+		var model = string.trim(cutstr(line," model:"," "));
+		var thisdvs = string.trim(cutstr(line,null,"    "));
+		table.push(dvs_arr,thisdvs);
+		echo("ADB检测到设备：    "++thisdvs++"    "++model++"    "++stat);
+	}
+	mainForm.sel_dvs.items=dvs_arr;
+	mainForm.sel_dvs.disabled=false;
+	mainForm.sel_dvs.selIndex=1;
+	mainForm.btn_initapk.disabled=false;
+	mainForm.btn_run.disabled=false;
+}
+
+
+
+function check_apk(pkgname,filename,pkgs,dvs){
+	//var pkgs = adbshell("pm list packages -3");
+	//var dvs=mainForm.sel_dvs.selText;
+	
+	if(string.indexOf(pkgs,"package:"++pkgname++'\r')){  //此处判断得用\r,不能用\n
+		echo(dvs++"    "++pkgname++"   已存在,无需安装 √");
+	}else{
+		echo(pkgname++"   未安装 ×");
+		if(!io.exist(filename)){
+			echo("本地文件:    "++filename++"   文件不存在,安装失败!");return;
+		}
+		echo(dvs++"    "++pkgname++"   开始安装...");
+		
+		adb("install "++io.fullpath(filename),dvs);
+		echo(dvs++"    "++pkgname++"   安装完成 √");
+	}
+}
+
+
+function init_apk(){
+    var dvs=mainForm.sel_dvs.selText;
+    // 安装必备apk
+    var inst_pkgs={
+        {"com.termux";"\apk\termux.apk";"https://f-droid.org/repo/com.termux_108.apk"};
+        //{"com.termux.api";"\attach\com.termux.api.apk";"https://f-droid.org/repo/com.termux.api_47.apk"};
+        //{"com.termux.boot";"\attach\com.termux.boot.apk";"https://f-droid.org/repo/com.termux.boot_7.apk"};
+        //{"com.termux.tasker";"\attach\com.termux.tasker.apk";"https://f-droid.org/repo/com.termux.tasker_5.apk"};
+        {"com.buscode.whatsinput";"\apk\whatsInput.apk";null};
+    };
+	var adb_pkgs = adbshell("pm list packages -3");
+    for(k,v in inst_pkgs){
+    	check_apk(v[1],v[2],adb_pkgs,dvs);
+    }
+    
+    //推送需要的文件
+    var push_files={
+        {"\termux_remotecontrol.zip";"/data/local/tmp/"};
+        //{"\shell";"/data/local/tmp/termux_remotecontrol/"};
+        //{"\src\index.js";"/data/local/tmp/termux_remotecontrol/src/"};
+        //{"\src\package.json";"/data/local/tmp/termux_remotecontrol/"};
+        //{"\src\view";"/data/local/tmp/termux_remotecontrol/"};
+    };
+	//#unzip -d ~/termux_remotecontrol /data/local/tmp/termux_remotecontrol.zip
+	for(k,v in push_files){
+		echo(dvs++"    "++v[1]++"    推送到手机 ...");
+    	adb('push "'++io.fullpath(v[1])++'" "'++v[2]++'"',dvs);
+    }
+    
+    echo(dvs++"    文件推送完成 √ ");
+    echo(dvs++"    请执行“启动服务”操作。");
+}
+
+
+//检测10次运行状态
+function adb_check_termux_top(dvs,err_time){
+    if(err_time>=10){
+        return false; 
+    }
+	var res=adb("shell dumpsys activity top",dvs);
+	if(string.indexOf(res," com.termux/.app.TermuxActivity ")){
+		return true;
+	}
+	err_time++;
+	win.delay(1000);
+	return adb_check_termux_top(dvs,err_time);
+}
+
+function rep_cmd_slash(cmd){
+    cmd=string.replace(cmd,"@\","\\");
+	return string.replace(cmd,"@'","\'");
+}
+
+function adb_input_text(text,dvs){
+    text = string.replace(text,"@?","\?");
+    //text = string.replace(text,"@\@","\@");
+    text = string.replace(text,"@&","\&");
+    text = string.replace(text,"@*","\*");
+    text = string.replace(text,"@#","\#");
+    text = string.replace(text,"@(","\(");
+    text = string.replace(text,"@)","\)");
+    text = string.replace(text,"@'","\'");
+    text = string.replace(text,"@<","\<");
+    text = string.replace(text,"@>","\>");
+    text = string.replace(text,"@~","\~");
+    text = string.replace(text,"@ ","\ ");
+    
+    adbshell('input text "'+text+'"',dvs);
+}
+
+function input_cmd(){
+	var dvs=mainForm.sel_dvs.selText;
+	var host = mainForm.sel_host.selText;
+	if(host=="请选择.."){
+		win.msgbox("请选择服务器IP和端口!");return false;
+	}
+	
+	
+    //启动termux
+    echo(dvs++"    启动 com.termux ...");
+    adbshell("am start -n com.termux/.app.TermuxActivity",dvs);
+    win.delay(2000);
+    echo(dvs++"    判断是否启动 com.termux ...");
+    var check_termux = adb_check_termux_top(dvs,1);
+    if(!check_termux){
+        echo("com.termux 未运行，无法进行下一步操作！");
+        return;
+    }
+    echo(dvs++"    com.termux正在运行 √");
+    
+	echo(dvs++"    输入命令 ...");
+ 	//adb_input_text("cd ~&&pkg install -y git",dvs);
+ 	adb_input_text("cd ~",dvs);
+	adb_input_text("&&export REMOTEHOST="++host,dvs);
+	adb_input_text("&&unzip -d ~/termux_remotecontrol /data/local/tmp/termux_remotecontrol.zip",dvs);
+	adb_input_text("&&echo 'bash ~/termux_remotecontrol/shell/termux_init.sh'>.bashrc",dvs);
+	adb_input_text("&& bash ~/termux_remotecontrol/shell/termux_init.sh",dvs);
+	win.delay(300);
+
+	//adbshell('input keyevent 66',dvs);
+	
+	echo(dvs++"    执行完成，命令完成前请勿操作手机 √");
+	echo(dvs++"    (可断开USB连接了) √");
+
+
+}
+
+
+
+
+
+
+
+mainForm.sel_dvs.selIndex=1;
+// ========================================================== 
+
+mainForm.btn_chkadb.oncommand = function(id,event){
+	chk_adb();
+}
+
+mainForm.btn_clrlog.oncommand = function(id,event){
+	mainForm.edit_log.text="";
+}
+
+mainForm.btn_initapk.oncommand = function(id,event){
+	init_apk();
+}
+
+mainForm.btn_run.oncommand = function(id,event){
+	input_cmd();
+}
+
+mainForm.btn_addhost.oncommand = function(id,event){
+	add_host();
+}
+
+mainForm.btn_delhost.oncommand = function(id,event){
+	del_host();
+}
+// ========================================================== 
+init_host()
+
+mainForm.show();
+return win.loopMessage();
