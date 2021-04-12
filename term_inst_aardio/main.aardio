@@ -53,6 +53,7 @@ mainForm.edit_log.setCueBannerText("运行日志输出区域");
 // ========================================================== 
 function init_host(seltxt){
     var str=string.load(host_file);
+    if(!str){return;}
     host_arr = web.json.parse(str);
 
     mainForm.sel_host.items=host_arr
@@ -192,7 +193,7 @@ function check_apk(pkgname,filename,pkgs,dvs){
 	if(string.indexOf(pkgs,"package:"++pkgname++'\r')){  //此处判断得用\r,不能用\n
 		echo(dvs++"    "++pkgname++"   已存在,无需安装 √");
 	}else{
-		echo(pkgname++"   未安装 ×");
+		echo(dvs++"    "++pkgname++"   未安装 ×");
 		if(!io.exist(filename)){
 			echo("本地文件:    "++filename++"   文件不存在,安装失败!");return;
 		}
@@ -303,8 +304,8 @@ function input_cmd(){
 	adb_input_text("&& bash ~/termux_remotecontrol/shell/termux_init.sh",dvs);
 	win.delay(300);
 
-	//adbshell('input keyevent 66',dvs);
-	
+	adbshell('input keyevent 66',dvs);
+		
 	echo(dvs++"    执行完成，命令完成前请勿操作手机 √");
 	echo(dvs++"    (可断开USB连接了) √");
 
