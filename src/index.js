@@ -1,16 +1,11 @@
 const WebSocket = require('ws')
 const request = require('request');
-const http = require('http');
 const express = require("express");
-const bodyParser = require('body-parser');
 const child_process = require("child_process");
 let ws_serv_initiative
 
 
 function runScreenServer(severAddr) {
-
-    //如果ws_serv_initiative已经初始化过，关闭先。
-    ws_serv_initiative && ws_serv_initiative.close()
 
     let ws_minicap
     let ws_minitouch
@@ -117,7 +112,8 @@ function runScreenServer(severAddr) {
 
 
     ////////////////////////////////////////
-    let started = false
+    let started_mini = false
+    let started_scrcpy = false
     ws_serv_initiative.onopen = (ev) => {
         console.log("serv ctrl open")
         //读取设备信息，并且发送给服务器
@@ -137,20 +133,20 @@ function runScreenServer(severAddr) {
         //scrcpy收发都是二进制数据；minicap二进制发送画面，不收数据；minitouch/whatsinput都是收发文本数据
         if (typeof msg.data == "object") { // 收到二进制对象，说明应该是scrcpy模式的数据，直接转发给ws_scrcpy
             ws_scrcpy.send(msg.data)
-        } else if (msg.data == "initiative_start_mini" && !started) { //收到开始同屏消息 mini模式
-            started = start_mini(ws_serv_initiative)
-        } else if (msg.data == "initiative_start_scrcpy" && !started) { //收到开始同屏消息 scrcpy模式
-            started = start_scrcpy(ws_serv_initiative)
+        } else if (msg.data == "initiative_start_mini" && !started_mini) { //收到开始同屏消息 mini模式
+            started_mini = start_mini(ws_serv_initiative)
+        } else if (msg.data == "initiative_start_scrcpy" && !started_scrcpy) { //收到开始同屏消息 scrcpy模式
+            started_scrcpy = start_scrcpy(ws_serv_initiative)
         } else if (msg.data == "screen_received") { //收到屏幕消息接收完毕的信号(主要是对minicap模式生效)
             isScreenSending = false;
-        } else if (msg.data.indexOf("minitouch:") == 0 && started &&
+        } else if (msg.data.indexOf("minitouch:") == 0 && started_mini &&
             ws_minitouch.readyState == 1) { //收到minitouch指令
             ws_minitouch.send(msg.data.substr("minitouch:".length))
-        } else if (msg.data.indexOf("whatsinput:") == 0 && started &&
+        } else if (msg.data.indexOf("whatsinput:") == 0 && started_mini &&
             ws_whatsinput.readyState == 1) { //收到whatsinput指令
             ws_whatsinput.send(msg.data.substr("whatsinput:".length))
             console.log(msg.data.substr("whatsinput:".length))
-        } else if (msg.data.indexOf("shell:") == 0 && started) { //收到shell指令
+        } else if (msg.data.indexOf("shell:") == 0 && started_mini) { //收到shell指令
             request(`http://${localhost}:7912/shell?command= ${msg.data.substr("shell:".length)}`, {
                 json: false
             }, (err, res, body) => {
@@ -161,8 +157,9 @@ function runScreenServer(severAddr) {
                 console.log("shell:" + body);
                 ws_serv_initiative.send("shell:" + body);
             });
-        } else if (msg.data == "initiative_stop" && started) {
-            started = false
+        } else if (msg.data == "initiative_stop") {
+            started_mini = false
+            started_scrcpy = false
             ws_minicap && ws_minicap.close()
             ws_minitouch && ws_minitouch.close()
             ws_whatsinput && ws_whatsinput.close()
@@ -176,7 +173,8 @@ function runScreenServer(severAddr) {
     };
     ws_serv_initiative.onclose = (ev) => {
         console.log("serv ctrl close")
-        started = false
+        started_mini = false
+        started_scrcpy = false
         ws_minicap && ws_minicap.close()
         ws_minitouch && ws_minitouch.close()
         ws_whatsinput && ws_whatsinput.close()
