@@ -33,6 +33,10 @@ else
     check
 fi
 
+#将必要的目录全部推送到临时文件夹
+#adb push ./termux_remotecontrol.zip /data/local/tmp/
+#unzip -d ~/termux_remotecontrol /data/local/tmp/termux_remotecontrol.zip
+
 #启动Termux
 adb shell am start -n com.termux/.app.TermuxActivity
 check
