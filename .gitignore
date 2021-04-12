@@ -1,2 +1,3 @@
 node_modules/
-*.apk
+linux_install/apk/
+windows_install/apk/
