@@ -269,6 +269,7 @@ function adb_input_text(text,dvs){
     text = string.replace(text,"@&","\&");
     text = string.replace(text,"@*","\*");
     text = string.replace(text,"@#","\#");
+    text = string.replace(text,"@|","\|");
     text = string.replace(text,"@(","\(");
     text = string.replace(text,"@)","\)");
     text = string.replace(text,"@'","\'");
@@ -301,6 +302,8 @@ function input_cmd(){
     echo(dvs++"    com.termux正在运行 √");
     
 	echo(dvs++"    输入命令 ...");
+	
+	adb_input_text("echo y | pkg update",dvs);
  	//adb_input_text("cd ~&&pkg install -y git",dvs);
  	
  	//发送ctrl+c
