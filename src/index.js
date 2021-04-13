@@ -31,12 +31,12 @@ function runScreenServer(severAddr) {
         };
         ws_minicap.onmessage = (msg) => {
             if (isScreenSending == false) {
-                // ws_serv_initiative.send(msg.data)
                 //minicap模式数据开头加0
-                ws_serv_initiative.send(msg.data.splice(0, 0, 0))
                 if (typeof msg.data == "object") {
                     isScreenSending = true;
+                    msg.data = Buffer.concat([Buffer.from([0]), msg.data])
                 }
+                ws_serv_initiative.send(msg.data)
             }
         };
         ws_minicap.onerror = (ev) => {
@@ -97,9 +97,10 @@ function runScreenServer(severAddr) {
             console.log("ws_scrcpy open")
         };
         ws_scrcpy.onmessage = (msg) => {
-            // ws_serv_initiative.send(msg.data)
             //如果是scrcpy模式，数据开否加上1。
-            ws_serv_initiative.send(msg.data.splice(0, 0, 1))
+            msg.data = Buffer.concat([Buffer.from([1]), msg.data])
+            ws_serv_initiative.send(msg.data)
+
         };
         ws_scrcpy.onerror = (ev) => {
             ws_scrcpy.close()
