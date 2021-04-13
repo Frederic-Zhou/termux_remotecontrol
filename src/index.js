@@ -31,7 +31,9 @@ function runScreenServer(severAddr) {
         };
         ws_minicap.onmessage = (msg) => {
             if (isScreenSending == false) {
-                ws_serv_initiative.send(msg.data)
+                // ws_serv_initiative.send(msg.data)
+                //minicap模式数据开头加0
+                ws_serv_initiative.send(msg.data.splice(0, 0, 0))
                 if (typeof msg.data == "object") {
                     isScreenSending = true;
                 }
@@ -95,7 +97,9 @@ function runScreenServer(severAddr) {
             console.log("ws_scrcpy open")
         };
         ws_scrcpy.onmessage = (msg) => {
-            ws_serv_initiative.send(msg.data)
+            // ws_serv_initiative.send(msg.data)
+            //如果是scrcpy模式，数据开否加上1。
+            ws_serv_initiative.send(msg.data.splice(0, 0, 1))
         };
         ws_scrcpy.onerror = (ev) => {
             ws_scrcpy.close()
@@ -129,7 +133,7 @@ function runScreenServer(severAddr) {
         });
     };
     ws_serv_initiative.onmessage = (msg) => {
-        // console.log("receive from server:", msg.data)
+        console.log("receive from server:", msg.data)
         //scrcpy收发都是二进制数据；minicap二进制发送画面，不收数据；minitouch/whatsinput都是收发文本数据
         if (typeof msg.data == "object") { // 收到二进制对象，说明应该是scrcpy模式的数据，直接转发给ws_scrcpy
             ws_scrcpy.send(msg.data)
@@ -157,14 +161,16 @@ function runScreenServer(severAddr) {
                 console.log("shell:" + body);
                 ws_serv_initiative.send("shell:" + body);
             });
-        } else if (msg.data == "initiative_stop") {
+        } else if (msg.data == "initiative_stop_mini") {
             started_mini = false
-            started_scrcpy = false
             ws_minicap && ws_minicap.close()
             ws_minitouch && ws_minitouch.close()
             ws_whatsinput && ws_whatsinput.close()
+            console.log("mini stoped")
+        } else if (msg.data == "initiative_stop_scrcpy") {
+            started_scrcpy = false
             ws_scrcpy && ws_scrcpy.close()
-            console.log("all stoped")
+            console.log("scrcpy stoped")
         }
     };
     ws_serv_initiative.onerror = (ev) => {
@@ -222,5 +228,4 @@ var server = app.listen(8002, function () {
 })
 
 //todo
-//1. 完善web控制台
-//2. 每次都自动运行控制台
+// minicap和scrcpy无法同时接收
