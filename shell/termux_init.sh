@@ -7,7 +7,7 @@ check() {
 }
 
 #检查是否已经运行
-result=$(ps -ef | grep node)
+result=$(ps -ef)
 if [[ "$result" =~ "node index.js" ]]; then
     echo -e "\033[33m started \033[0m"
     exit
@@ -17,8 +17,8 @@ sleep 3
 
 #1. 安装必要环境
 echo -e "\033[32m ===NEEDED PACKAGES INSTALL START=== \033[0m"
-# echo y | pkg update
-pkg install -y nodejs-lts termux-api git
+echo y | pkg update
+pkg install -y nodejs-lts git
 echo -e "\033[32m ===NEEDED PACKAGES INSTALL OVER=== \033[0m"
 #####################################################
 
@@ -52,7 +52,6 @@ else
     #adb -t 1 :第一个连接上的设备
     adb -t 1 push ~/termux_remotecontrol/app/scrcpy-server.jar /data/local/tmp/scrcpy-server.jar
     adb -t 1 shell CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process scrcpy-server.jar com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2>&1 >/dev/null &
-    check
 fi
 echo -e "\033[32m ===scrcpy-server.jar INSTALL OVER=== \033[0m"
 #安装ATX-agent

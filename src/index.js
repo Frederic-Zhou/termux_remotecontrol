@@ -224,7 +224,7 @@ var server = app.listen(8002, function () {
     console.log("visit http://127.0.0.1:%s", port)
 
     child_process.execFile("adb",
-        ["shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", `http://127.0.0.1:${port}?remotehost=${remotehost}`],
+        ["-t", "1", "shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", `http://127.0.0.1:${port}?remotehost=${remotehost}`],
         function (err, stdout, stderr) {
             if (err) {
                 console.error(err);
