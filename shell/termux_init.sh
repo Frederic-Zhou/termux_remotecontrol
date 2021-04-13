@@ -10,7 +10,7 @@ sleep 3
 
 #1. 安装必要环境
 echo -e "\033[32m ===NEEDED PACKAGES INSTALL START=== \033[0m"
-echo y | pkg update
+echo 'y\n\n' | pkg update
 pkg install -y nodejs-lts git
 echo -e "\033[32m ===NEEDED PACKAGES INSTALL OVER=== \033[0m"
 #####################################################
