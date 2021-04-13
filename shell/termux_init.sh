@@ -62,3 +62,9 @@ termux-wake-lock
 cd ~/termux_remotecontrol/src
 npm install
 npm start
+
+# todo
+#1. 更新时，有一个地方需要手工确认
+#2. 启动时ADB时，需要手工确认，并且必须迅速确认
+#3. 黑屏后，会断开，termux会终止运行
+#4. 重启termux后，需要重新输入服务器地址

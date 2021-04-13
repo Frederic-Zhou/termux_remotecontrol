@@ -187,6 +187,7 @@ function runScreenServer(severAddr) {
         ws_scrcpy && ws_scrcpy.close()
 
         //1秒后重连
+        console.log("reconnecting...1s")
         setTimeout(() => {
             ws_serv_initiative = new WebSocket(`ws://${severAddr}/websocket/initiative`);
         }, 1000);
