@@ -26,6 +26,13 @@ else
     check
 fi
 
+if [[ "$packages" =~ "package:com.termux.api" ]]; then
+    echo "termux Installed"
+else
+    adb install ./apk/termux_api.apk
+    check
+fi
+
 if [[ "$packages" =~ "package:com.buscode.whatsinput" ]]; then
     echo "whatsinput Installed"
 else

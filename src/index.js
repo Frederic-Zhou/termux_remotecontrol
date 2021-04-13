@@ -114,12 +114,6 @@ function runScreenServer(severAddr) {
         return true
     }
 
-    function alive() {
-        ws_serv_initiative.send("live")
-        setTimeout(() => {
-            alive()
-        }, 3000);
-    }
 
     ////////////////////////////////////////
     let started_mini = false
@@ -136,7 +130,6 @@ function runScreenServer(severAddr) {
             }
             console.log("info1:" + body);
             ws_serv_initiative.send("info:" + body);
-            alive()
         });
     };
     ws_serv_initiative.onmessage = (msg) => {
@@ -192,7 +185,11 @@ function runScreenServer(severAddr) {
         ws_minitouch && ws_minitouch.close()
         ws_whatsinput && ws_whatsinput.close()
         ws_scrcpy && ws_scrcpy.close()
-        // process.exit(1)
+
+        //1秒后重连
+        setTimeout(() => {
+            ws_serv_initiative = new WebSocket(`ws://${severAddr}/websocket/initiative`);
+        }, 1000);
     };
 
 }
