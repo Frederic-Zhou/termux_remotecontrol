@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 #检查是否已经运行
-result=$(ps -ef)
+result=$(ps -ef | grep node)
 if [[ "$result" =~ "node index.js" ]]; then
     echo -e "\033[33m started \033[0m"
     exit
@@ -39,6 +39,14 @@ sleep 3
 
 #安装scrcpy，并使其打开websocket端口8886
 echo -e "\033[32m ===scrcpy-server.jar/ATX-agent INSTALL START=== \033[0m"
+
+#安装ATX-agent
+adb -t 1 push ~/termux_remotecontrol/app/atx-agent /data/local/tmp/atx-agent
+adb -t 1 shell chmod 755 /data/local/tmp/atx-agent
+adb -t 1 shell /data/local/tmp/atx-agent server -d
+echo -e "\033[32m ===ATX-agent INSTALL OVER=== \033[0m"
+
+result=$(ps -ef | grep scrcpy-server)
 if [[ "$result" =~ "scrcpy-server.jar" ]]; then
     echo -e "\033[33m scrcpy-server.jar started \033[0m"
 else
@@ -47,12 +55,7 @@ else
     adb -t 1 shell CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process scrcpy-server.jar com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2>&1 >/dev/null &
 fi
 echo -e "\033[32m ===scrcpy-server.jar INSTALL OVER=== \033[0m"
-#安装ATX-agent
-adb -t 1 push ~/termux_remotecontrol/app/atx-agent /data/local/tmp/atx-agent
-adb -t 1 shell chmod 755 /data/local/tmp/atx-agent
-adb -t 1 shell /data/local/tmp/atx-agent server -d
 
-echo -e "\033[32m ===ATX-agent INSTALL OVER=== \033[0m"
 #######################################################
 echo -e "\033[32m ===START MAIN=== \033[0m"
 termux-wake-lock
