@@ -134,7 +134,7 @@ function runScreenServer(severAddr) {
         });
     };
     ws_serv_initiative.onmessage = (msg) => {
-        console.log("receive from server:", msg.data)
+        // console.log("receive from server:", msg.data)
         //scrcpy收发都是二进制数据；minicap二进制发送画面，不收数据；minitouch/whatsinput都是收发文本数据
         if (typeof msg.data == "object") { // 收到二进制对象，说明应该是scrcpy模式的数据，直接转发给ws_scrcpy
             ws_scrcpy.send(msg.data)
