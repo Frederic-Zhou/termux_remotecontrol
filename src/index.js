@@ -114,7 +114,12 @@ function runScreenServer(severAddr) {
         return true
     }
 
-
+    function alive() {
+        ws_serv_initiative.send("live")
+        setTimeout(() => {
+            alive()
+        }, 3000);
+    }
 
     ////////////////////////////////////////
     let started_mini = false
@@ -131,6 +136,7 @@ function runScreenServer(severAddr) {
             }
             console.log("info1:" + body);
             ws_serv_initiative.send("info:" + body);
+            alive()
         });
     };
     ws_serv_initiative.onmessage = (msg) => {
