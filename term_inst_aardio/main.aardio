@@ -175,6 +175,7 @@ function chk_adb(){
 		var thisdvs = string.trim(cutstr(line,null,"    "));
 		table.push(dvs_arr,thisdvs);
 		echo("ADB检测到设备：    "++thisdvs++"    "++model++"    "++stat);
+		adb("tcpip 5555",thisdvs);
 	}
 	mainForm.sel_dvs.items=dvs_arr;
 	mainForm.sel_dvs.disabled=false;
@@ -303,7 +304,7 @@ function input_cmd(){
     
 	echo(dvs++"    输入命令 ...");
 	
-	adb_input_text("echo y | pkg update",dvs);
+	//adb_input_text("echo y | pkg update && ",dvs);
  	//adb_input_text("cd ~&&pkg install -y git",dvs);
  	
  	//发送ctrl+c
