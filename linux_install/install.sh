@@ -49,7 +49,8 @@ adb shell input text "cd\ ~\&\&pkg\ install\ -y\ git"
 adb shell input text "\&\&rm\ -rf\ ~/termux_remotecontrol"
 adb shell input text "\&\&export\ REMOTEHOST=192.168.3.100:8001"
 adb shell input text "\&\&git\ clone\ https://github.com/Frederic-Zhou/termux_remotecontrol.git"
-adb shell input text "\&\&echo\ \'bash\ ~/termux_remotecontrol/shell/termux_init.sh\'\>.bashrc"
+adb shell input text "\&\&echo\ \'export\ REMOTEHOST=192.168.3.100:8001\'\>.bashrc"
+adb shell input text "\&\&echo\ \'bash\ ~/termux_remotecontrol/shell/termux_init.sh\'\>\>.bashrc"
 adb shell input text "\&\&bash\ ~/termux_remotecontrol/shell/termux_init.sh"
 adb shell input keyevent 66
 

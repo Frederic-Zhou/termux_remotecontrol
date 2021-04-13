@@ -187,8 +187,9 @@ function runScreenServer(severAddr) {
         ws_scrcpy && ws_scrcpy.close()
 
         //1秒后重连
-        console.log("reconnecting...1s")
+        console.log("afert 1s reconnect")
         setTimeout(() => {
+            console.log("reconnecting...")
             ws_serv_initiative = new WebSocket(`ws://${severAddr}/websocket/initiative`);
         }, 1000);
     };
@@ -196,6 +197,10 @@ function runScreenServer(severAddr) {
 }
 
 let remotehost = process.env.REMOTEHOST
+
+
+
+
 if (remotehost) {
     runScreenServer(remotehost)
 }
@@ -231,6 +236,3 @@ var server = app.listen(8002, function () {
             console.log("stderr:", stderr);
         });
 })
-
-//todo
-// minicap和scrcpy无法同时接收

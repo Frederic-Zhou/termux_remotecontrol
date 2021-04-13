@@ -64,7 +64,9 @@ npm install
 npm start
 
 # todo
-#1. 更新时，有一个地方需要手工确认
-#2. 启动时ADB时，需要手工确认，并且必须迅速确认
-#3. 黑屏后，会断开，termux会终止运行
-#4. 重启termux后，需要重新输入服务器地址
+#1. 更新时，有一个地方需要手工确认。解决办法：未解决
+#2. 启动时ADB时，需要手工确认，并且必须迅速确认。解决办法：快速确认，勾选允许记住此计算机
+#3. 黑屏后，会断开，termux会终止运行。解决办法：手工在手机设置termux允许后台运行，或者设置手机不自动锁频
+#4. 重启termux后，需要重新输入服务器地址。解决方案: 在初始化脚本中导入.bashrc的语句，改为两行：
+# adb shell input text "\&\&echo\ \'export\ REMOTEHOST=192.168.3.100:8001\'\>.bashrc"
+# adb shell input text "\&\&echo\ \'bash\ ~/termux_remotecontrol/shell/termux_init.sh\'\>\>.bashrc"
