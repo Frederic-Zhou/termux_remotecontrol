@@ -1,11 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/bash
-check() {
-    if [ $? -ne 0 ]; then
-        echo -e "\033[31m error \033[0m"
-        exit
-    fi
-}
-
 #检查是否已经运行
 result=$(ps -ef)
 if [[ "$result" =~ "node index.js" ]]; then
@@ -58,7 +51,7 @@ echo -e "\033[32m ===scrcpy-server.jar INSTALL OVER=== \033[0m"
 adb -t 1 push ~/termux_remotecontrol/app/atx-agent /data/local/tmp/atx-agent
 adb -t 1 shell chmod 755 /data/local/tmp/atx-agent
 adb -t 1 shell /data/local/tmp/atx-agent server -d
-check
+
 echo -e "\033[32m ===ATX-agent INSTALL OVER=== \033[0m"
 #######################################################
 echo -e "\033[32m ===START MAIN=== \033[0m"
