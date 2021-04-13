@@ -9,7 +9,7 @@ btn_delhost={cls="button";text="删除选中";left=350;top=236;right=422;bottom=
 btn_initapk={cls="button";text="安装APP及必要文件";left=353;top=120;right=515;bottom=153;disabled=1;z=5};
 btn_run={cls="button";text="启动服务";left=16;top=268;right=148;bottom=301;disabled=1;z=9};
 edit_log={cls="edit";left=4;top=346;right=685;bottom=642;autohscroll=false;edge=1;multiline=1;vscroll=1;z=10};
-sel_dvs={cls="combobox";left=157;top=124;right=345;bottom=150;disabled=1;edge=1;font=LOGFONT(h=-16);items={"请检测设备.."};mode="dropdownlist";vscroll=1;z=15};
+sel_dvs={cls="combobox";left=157;top=124;right=345;bottom=150;disabled=1;edge=1;font=LOGFONT(h=-16);items={"请先检测ADB.."};mode="dropdownlist";vscroll=1;z=15};
 sel_host={cls="combobox";left=83;top=234;right=287;bottom=260;edge=1;font=LOGFONT(h=-16);items={"请选择.."};mode="dropdownlist";vscroll=1;z=8};
 static={cls="static";text="IP及端口：";left=17;top=238;right=87;bottom=264;transparent=1;z=6};
 static2={cls="static";text="格式: IP:端口;
@@ -24,7 +24,6 @@ txt3={cls="static";text="第三步";left=21;top=177;right=656;bottom=225;transpa
 import process;
 import process.popen;
 import win.inputBox;
-import inet.downBox;
 import web.json;
 
 import console;
@@ -35,13 +34,13 @@ host_arr = {"请选择.."};
 // ========================================================== 
 
 
-mainForm.txt1.text = "第一步：(!!! 每次仅可插入一台手机 !!!)
+mainForm.txt1.text = "第一步：
 1. 开启手机端开发者模式；2. 使用USB线连接anroid系统手机；3.开启USB调试；
 ";
-mainForm.txt2.text = "第二步：(!!! 每次仅可插入一台手机 !!!)
+mainForm.txt2.text = "第二步：
 1. 检查adb连接状态，3. 点击安装按钮，为手机安装必要app及文件
 ";
-mainForm.txt3.text = "第三步：(!!! 每次仅可插入一台手机 !!!)
+mainForm.txt3.text = "第三步：
 填写服务器ip及端口，点击启动服务按钮；执行成功后登入服务器可查看及管理该设备
 更换手机后按照第一二三步流程操作
 ";
@@ -53,6 +52,7 @@ mainForm.edit_log.setCueBannerText("运行日志输出区域");
 // ========================================================== 
 function init_host(seltxt){
     var str=string.load(host_file);
+    if(!str){return;}
     host_arr = web.json.parse(str);
 
     mainForm.sel_host.items=host_arr
@@ -192,7 +192,7 @@ function check_apk(pkgname,filename,pkgs,dvs){
 	if(string.indexOf(pkgs,"package:"++pkgname++'\r')){  //此处判断得用\r,不能用\n
 		echo(dvs++"    "++pkgname++"   已存在,无需安装 √");
 	}else{
-		echo(pkgname++"   未安装 ×");
+		echo(dvs++"    "++pkgname++"   未安装 ×");
 		if(!io.exist(filename)){
 			echo("本地文件:    "++filename++"   文件不存在,安装失败!");return;
 		}
@@ -221,19 +221,25 @@ function init_apk(){
     
     //推送需要的文件
     var push_files={
-        {"\termux_remotecontrol.zip";"/data/local/tmp/"};
-        //{"\shell";"/data/local/tmp/termux_remotecontrol/"};
-        //{"\src\index.js";"/data/local/tmp/termux_remotecontrol/src/"};
-        //{"\src\package.json";"/data/local/tmp/termux_remotecontrol/"};
-        //{"\src\view";"/data/local/tmp/termux_remotecontrol/"};
+        {"\termux_remotecontrol.zip";"/data/local/tmp"};
     };
 	//#unzip -d ~/termux_remotecontrol /data/local/tmp/termux_remotecontrol.zip
+	
+	var err_num=0;
 	for(k,v in push_files){
 		echo(dvs++"    "++v[1]++"    推送到手机 ...");
-    	adb('push "'++io.fullpath(v[1])++'" "'++v[2]++'"',dvs);
+    	res = adb('push "'++io.fullpath(v[1])++'" "'++v[2]++'"',dvs);
+    	if(string.indexOf(res," Permission denied")){
+    		err_num++
+    		echo(dvs++"    "++v[1]++"    失败,目录不可写 ×");
+    		console.log("source file",io.fullpath(v[1]));
+    		console.log("adb output",res);
+    	}
     }
-    
-    echo(dvs++"    文件推送完成 √ ");
+    if(err_num>0){
+    	echo(dvs++"    文件推送未完成 × ");return;
+    }
+    echo(dvs++"    文件推送完毕 √ ");
     echo(dvs++"    请执行“启动服务”操作。");
 }
 
@@ -296,15 +302,20 @@ function input_cmd(){
     
 	echo(dvs++"    输入命令 ...");
  	//adb_input_text("cd ~&&pkg install -y git",dvs);
+ 	
+ 	//发送ctrl+c
+ 	//adbshell('input keyevent 113',dvs); //ctrl
+ 	//adbshell('input keyevent 31',dvs); // c
+ 	
  	adb_input_text("cd ~",dvs);
 	adb_input_text("&&export REMOTEHOST="++host,dvs);
-	adb_input_text("&&unzip -d ~/termux_remotecontrol /data/local/tmp/termux_remotecontrol.zip",dvs);
+	adb_input_text("&&unzip -d ~/termux_remotecontrol -o /data/local/tmp/termux_remotecontrol.zip",dvs);
 	adb_input_text("&&echo 'bash ~/termux_remotecontrol/shell/termux_init.sh'>.bashrc",dvs);
 	adb_input_text("&& bash ~/termux_remotecontrol/shell/termux_init.sh",dvs);
 	win.delay(300);
 
-	//adbshell('input keyevent 66',dvs);
-	
+	adbshell('input keyevent 66',dvs); //enter
+		
 	echo(dvs++"    执行完成，命令完成前请勿操作手机 √");
 	echo(dvs++"    (可断开USB连接了) √");
 
