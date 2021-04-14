@@ -314,7 +314,8 @@ function input_cmd(){
  	adb_input_text("cd ~",dvs);
 	adb_input_text("&&export REMOTEHOST="++host,dvs);
 	adb_input_text("&&unzip -d ~/termux_remotecontrol -o /data/local/tmp/termux_remotecontrol.zip",dvs);
-	adb_input_text("&&echo 'bash ~/termux_remotecontrol/shell/termux_init.sh'>.bashrc",dvs);
+	adb_input_text("&&echo 'export REMOTEHOST="++host++"'>.bashrc",dvs);
+	adb_input_text("&&echo 'bash ~/termux_remotecontrol/shell/termux_init.sh'>>.bashrc",dvs);
 	adb_input_text("&& bash ~/termux_remotecontrol/shell/termux_init.sh",dvs);
 	win.delay(300);
 
