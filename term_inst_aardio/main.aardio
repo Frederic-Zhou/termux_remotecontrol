@@ -2,18 +2,18 @@ import win.ui;
 /*DSG{{*/
 mainForm = win.form(text="手机终端安装工具";right=689;bottom=646;max=false)
 mainForm.add(
-btn_addhost={cls="button";text="新增";left=294;top=236;right=340;bottom=258;z=14};
+btn_addhost={cls="button";text="新增";left=294;top=236;right=340;bottom=258;hide=1;z=14};
 btn_chkadb={cls="button";text="检测ADB连接";left=18;top=120;right=150;bottom=153;z=4};
 btn_clrlog={cls="button";text="清除";left=623;top=322;right=685;bottom=344;z=12};
-btn_delhost={cls="button";text="删除选中";left=350;top=236;right=422;bottom=258;z=13};
+btn_delhost={cls="button";text="删除选中";left=350;top=236;right=422;bottom=258;hide=1;z=13};
 btn_initapk={cls="button";text="安装APP及必要文件";left=353;top=120;right=515;bottom=153;disabled=1;z=5};
 btn_run={cls="button";text="启动服务";left=16;top=268;right=148;bottom=301;disabled=1;z=9};
 edit_log={cls="edit";left=4;top=346;right=685;bottom=642;autohscroll=false;edge=1;multiline=1;vscroll=1;z=10};
 sel_dvs={cls="combobox";left=157;top=124;right=345;bottom=150;disabled=1;edge=1;font=LOGFONT(h=-16);items={"请先检测ADB.."};mode="dropdownlist";vscroll=1;z=15};
-sel_host={cls="combobox";left=83;top=234;right=287;bottom=260;edge=1;font=LOGFONT(h=-16);items={"请选择.."};mode="dropdownlist";vscroll=1;z=8};
-static={cls="static";text="IP及端口：";left=17;top=238;right=87;bottom=264;transparent=1;z=6};
+sel_host={cls="combobox";left=83;top=234;right=287;bottom=260;edge=1;font=LOGFONT(h=-16);hide=1;items={"请选择.."};mode="dropdownlist";vscroll=1;z=8};
+static={cls="static";text="IP及端口：";left=17;top=238;right=87;bottom=264;hide=1;transparent=1;z=6};
 static2={cls="static";text="格式: IP:端口;
-如:127.0.0.1:8081";left=431;top=234;right=552;bottom=266;transparent=1;z=7};
+如:127.0.0.1:8081";left=431;top=234;right=552;bottom=266;hide=1;transparent=1;z=7};
 static3={cls="static";text="运行日志：";left=8;top=325;right=116;bottom=346;transparent=1;z=11};
 txt1={cls="static";text="第一步";left=21;top=13;right=656;bottom=66;transparent=1;z=1};
 txt2={cls="static";text="第二步";left=20;top=77;right=655;bottom=111;transparent=1;z=2};
@@ -209,20 +209,25 @@ function init_apk(){
     var dvs=mainForm.sel_dvs.selText;
     // 安装必备apk
     var inst_pkgs={
-        {"com.termux";"\apk\termux.apk";"https://f-droid.org/repo/com.termux_108.apk"};
+        {"com.example.android.remotecontrol2";"\remotecontrol2.apk";null};
+        //{"com.termux";"\apk\termux.apk";"https://f-droid.org/repo/com.termux_108.apk"};
         //{"com.termux.api";"\attach\com.termux.api.apk";"https://f-droid.org/repo/com.termux.api_47.apk"};
         //{"com.termux.boot";"\attach\com.termux.boot.apk";"https://f-droid.org/repo/com.termux.boot_7.apk"};
         //{"com.termux.tasker";"\attach\com.termux.tasker.apk";"https://f-droid.org/repo/com.termux.tasker_5.apk"};
-        {"com.buscode.whatsinput";"\apk\whatsInput.apk";null};
+        //{"com.buscode.whatsinput";"\apk\whatsInput.apk";null};
     };
 	var adb_pkgs = adbshell("pm list packages -3");
     for(k,v in inst_pkgs){
-    	check_apk(v[1],v[2],adb_pkgs,dvs);
+    	//check_apk(v[1],v[2],adb_pkgs,dvs);
+    	echo(dvs++"    "++v[1]++"   开始安装...");
+    	adb("install -r "++io.fullpath(v[2]),dvs);
+    	echo(dvs++"    "++v[1]++"   安装完成 √");
     }
     
     //推送需要的文件
     var push_files={
-        {"\termux_remotecontrol.zip";"/data/local/tmp"};
+        {"\atx-agent";"/data/local/tmp/atx-agent"};
+        {"\scrcpy-server.jar";"/data/local/tmp/scrcpy-server.jar"};
     };
 	//#unzip -d ~/termux_remotecontrol /data/local/tmp/termux_remotecontrol.zip
 	
@@ -235,12 +240,16 @@ function init_apk(){
     		echo(dvs++"    "++v[1]++"    失败,目录不可写 ×");
     		console.log("source file",io.fullpath(v[1]));
     		console.log("adb output",res);
+    	}else{
+    		echo(dvs++"    "++v[1]++"    推送成功 √");
     	}
     }
     if(err_num>0){
     	echo(dvs++"    文件推送未完成 × ");return;
     }
     echo(dvs++"    文件推送完毕 √ ");
+    adbshell("chmod 755 /data/local/tmp/atx-agent",dvs);
+    adbshell("/data/local/tmp/atx-agent server -d",dvs);
     echo(dvs++"    请执行“启动服务”操作。");
 }
 
@@ -284,10 +293,18 @@ function adb_input_text(text,dvs){
 
 function input_cmd(){
 	var dvs=mainForm.sel_dvs.selText;
-	var host = mainForm.sel_host.selText;
-	if(host=="请选择.."){
-		win.msgbox("请选择服务器IP和端口!");return false;
-	}
+	//var host = mainForm.sel_host.selText;
+	//if(host=="请选择.."){
+	//	win.msgbox("请选择服务器IP和端口!");return false;
+	//}
+	
+	echo(dvs++"    安装服务 ...");
+	
+	adbshell("CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process scrcpy-server.jar com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2\>\&1 \>/dev/null \&",dvs);
+	
+	echo(dvs++"    执行完成，请在APP上填写服务器 √");
+	echo(dvs++"    (可断开USB连接了) √");
+	return;
 	
 	
     //启动termux
