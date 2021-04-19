@@ -209,19 +209,19 @@ function init_apk(){
     var dvs=mainForm.sel_dvs.selText;
     // 安装必备apk
     var inst_pkgs={
-        {"com.example.android.remotecontrol2";"\remotecontrol2.apk";null};
+        {"com.example.android.remotecontrol";"\remotecontrol.apk";null};
         //{"com.termux";"\apk\termux.apk";"https://f-droid.org/repo/com.termux_108.apk"};
         //{"com.termux.api";"\attach\com.termux.api.apk";"https://f-droid.org/repo/com.termux.api_47.apk"};
         //{"com.termux.boot";"\attach\com.termux.boot.apk";"https://f-droid.org/repo/com.termux.boot_7.apk"};
         //{"com.termux.tasker";"\attach\com.termux.tasker.apk";"https://f-droid.org/repo/com.termux.tasker_5.apk"};
         //{"com.buscode.whatsinput";"\apk\whatsInput.apk";null};
     };
-	var adb_pkgs = adbshell("pm list packages -3");
+	//var adb_pkgs = adbshell("pm list packages -3");
     for(k,v in inst_pkgs){
     	//check_apk(v[1],v[2],adb_pkgs,dvs);
-    	echo(dvs++"    "++v[1]++"   开始安装...");
+    	echo(dvs++"    "++v[1]++"   开始安装...  覆盖安装较耗时，请人工核实安装情况");
     	adb("install -r "++io.fullpath(v[2]),dvs);
-    	echo(dvs++"    "++v[1]++"   安装完成 √");
+    	echo(dvs++"    "++v[1]++"   安装完成 √  (此处提示不可靠，请人工核实)");
     }
     
     //推送需要的文件
@@ -302,7 +302,11 @@ function input_cmd(){
 	
 	adbshell("CLASSPATH=/data/local/tmp/scrcpy-server.jar nohup app_process scrcpy-server.jar com.genymobile.scrcpy.Server 1.17-ws1 web 8886 2\>\&1 \>/dev/null \&",dvs);
 	
-	echo(dvs++"    执行完成，请在APP上填写服务器 √");
+	
+	echo(dvs++"    启动APP ...");
+	adbshell("am start -n com.example.android.remotecontrol/.MainActivity",dvs);
+	
+	echo(dvs++"    执行完成，请在APP输入框内填写服务器 √");
 	echo(dvs++"    (可断开USB连接了) √");
 	return;
 	
