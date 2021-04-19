@@ -3,13 +3,13 @@ import win.ui;
 mainForm = win.form(text="手机终端安装工具";right=689;bottom=646;max=false)
 mainForm.add(
 btn_addhost={cls="button";text="新增";left=294;top=236;right=340;bottom=258;hide=1;z=14};
-btn_chkadb={cls="button";text="检测ADB连接";left=18;top=120;right=150;bottom=153;z=4};
+btn_chkadb={cls="button";text="检测ADB连接";left=18;top=126;right=150;bottom=159;z=4};
 btn_clrlog={cls="button";text="清除";left=623;top=322;right=685;bottom=344;z=12};
 btn_delhost={cls="button";text="删除选中";left=350;top=236;right=422;bottom=258;hide=1;z=13};
-btn_initapk={cls="button";text="安装APP及必要文件";left=353;top=120;right=515;bottom=153;disabled=1;z=5};
+btn_initapk={cls="button";text="安装APP及必要文件";left=353;top=126;right=515;bottom=159;disabled=1;z=5};
 btn_run={cls="button";text="启动服务";left=16;top=268;right=148;bottom=301;disabled=1;z=9};
 edit_log={cls="edit";left=4;top=346;right=685;bottom=642;autohscroll=false;edge=1;multiline=1;vscroll=1;z=10};
-sel_dvs={cls="combobox";left=157;top=124;right=345;bottom=150;disabled=1;edge=1;font=LOGFONT(h=-16);items={"请先检测ADB.."};mode="dropdownlist";vscroll=1;z=15};
+sel_dvs={cls="combobox";left=157;top=130;right=345;bottom=156;disabled=1;edge=1;font=LOGFONT(h=-16);items={"请先检测ADB.."};mode="dropdownlist";vscroll=1;z=15};
 sel_host={cls="combobox";left=83;top=234;right=287;bottom=260;edge=1;font=LOGFONT(h=-16);hide=1;items={"请选择.."};mode="dropdownlist";vscroll=1;z=8};
 static={cls="static";text="IP及端口：";left=17;top=238;right=87;bottom=264;hide=1;transparent=1;z=6};
 static2={cls="static";text="格式: IP:端口;
@@ -38,7 +38,7 @@ mainForm.txt1.text = "第一步：
 1. 开启手机端开发者模式；2. 使用USB线连接anroid系统手机；3.开启USB调试；
 ";
 mainForm.txt2.text = "第二步：
-1. 检查adb连接状态，3. 点击安装按钮，为手机安装必要app及文件
+1. 检查adb连接状态，3. 点击安装按钮，为手机安装必要app及文件 (部分手机无法覆盖安装，可先卸载)
 ";
 mainForm.txt3.text = "第三步：
 填写服务器ip及端口，点击启动服务按钮；执行成功后登入服务器可查看及管理该设备
