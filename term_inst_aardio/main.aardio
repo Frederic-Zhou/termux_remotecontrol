@@ -297,6 +297,9 @@ function input_cmd(){
 	//if(host=="请选择.."){
 	//	win.msgbox("请选择服务器IP和端口!");return false;
 	//}
+	//adb shell getprop ro.build.version.release
+	
+	 
 	
 	echo(dvs++"    安装服务 ...");
 	
@@ -308,6 +311,18 @@ function input_cmd(){
 	
 	echo(dvs++"    执行完成，请在APP输入框内填写服务器 √");
 	echo(dvs++"    (可断开USB连接了) √");
+	
+
+	var vstr = string.trim(adbshell("getprop ro.build.version.release",dvs));
+	if(vstr!=""){
+		if(!math.isInteger(vstr)){
+			echo(dvs++"    获取系统版本号失败，请检查是否开启USB调试 ×");
+			return;
+		}
+		if(tonumber(vstr)<9){
+			win.msgbox(dvs++"    android系统版本小于9，可能会出现不稳定");
+		}
+	}
 	return;
 	
 	
